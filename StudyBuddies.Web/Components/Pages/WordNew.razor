@@ -1,0 +1,101 @@
+@page "/partners/{PartnershipId:guid}/words/new"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@rendermode InteractiveServer
+
+@inject IPartnershipService PartnershipService
+@inject IWordService WordService
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+@inject IStringLocalizer<SharedResource> L
+
+<PageTitle>@L["Word.AddNew"]</PageTitle>
+
+@if (_partnership is null)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else
+{
+    <MudText Typo="Typo.h5" GutterBottom="true">
+        @string.Format(L["Word.New"].Value, _partnership.Partner.DisplayName)
+    </MudText>
+    <MudText Typo="Typo.caption" Color="Color.Tertiary" Class="mb-4">
+        @string.Format(L["Word.NewSubtext"].Value, _myLanguage.ToUpper(), _partnership.Partner.NativeLanguage.ToUpper())
+    </MudText>
+
+    <MudPaper Class="pa-4" Elevation="0" Outlined="true">
+        <MudTextField @bind-Value="_term" Label="@($"{L["Word.TermLabel"]} ({_myLanguage.ToUpper()})")" Variant="Variant.Outlined" Required="true" Class="mb-3" />
+        <MudTextField @bind-Value="_translation" Label="@($"{L["Word.TranslationLabel"]} ({_partnership.Partner.NativeLanguage.ToUpper()})")" Variant="Variant.Outlined" Required="true" Class="mb-3" />
+        <MudTextField @bind-Value="_example" Label="@L["Word.ExampleLabel"]" Variant="Variant.Outlined" Class="mb-3" />
+        <MudTextField @bind-Value="_notes" Label="@L["Word.NotesLabel"]" Variant="Variant.Outlined" Lines="2" Class="mb-3" />
+        <MudTextField @bind-Value="_tagsInput" Label="@L["Word.TagsLabel"]" Variant="Variant.Outlined" Class="mb-3" />
+
+        <MudStack Row="true">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Save" Disabled="@_saving">
+                @L["Common.Save"]
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Href="@($"partners/{PartnershipId}")">
+                @L["Common.Cancel"]
+            </MudButton>
+        </MudStack>
+    </MudPaper>
+}
+
+@code {
+    [Parameter] public Guid PartnershipId { get; set; }
+
+    private string? _userId;
+    private string _myLanguage = "";
+    private PartnershipSummary? _partnership;
+
+    private string _term = "";
+    private string _translation = "";
+    private string _example = "";
+    private string _notes = "";
+    private string _tagsInput = "";
+    private bool _saving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        _userId = UserManager.GetUserId(auth.User);
+        if (_userId is null) return;
+
+        _partnership = await PartnershipService.GetPartnershipAsync(PartnershipId, _userId);
+        var me = await UserManager.GetUserAsync(auth.User);
+        _myLanguage = me?.NativeLanguage ?? "";
+    }
+
+    private async Task Save()
+    {
+        if (_userId is null) return;
+        _saving = true;
+        try
+        {
+            var tags = _tagsInput
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(t => t.Trim())
+                .Where(t => !string.IsNullOrEmpty(t))
+                .ToList();
+
+            await WordService.CreateWordAsync(PartnershipId, _userId,
+                new WordCreateInput(_term, _translation,
+                    string.IsNullOrWhiteSpace(_example) ? null : _example,
+                    string.IsNullOrWhiteSpace(_notes) ? null : _notes,
+                    tags));
+
+            Snackbar.Add(L["Word.Saved"].Value, Severity.Success);
+            Nav.NavigateTo($"partners/{PartnershipId}");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

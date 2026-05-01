@@ -1,0 +1,86 @@
+@page "/dashboard"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@rendermode InteractiveServer
+
+@inject IPartnershipService PartnershipService
+@inject IStudyService StudyService
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
+@inject IStringLocalizer<SharedResource> L
+
+<PageTitle>@L["Dashboard.Title"]</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">@L["Dashboard.Title"]</MudText>
+
+@if (_loading)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (_active.Count == 0)
+{
+    <MudAlert Severity="Severity.Info" Class="mb-4">@L["Dashboard.NoPartners"]</MudAlert>
+}
+else
+{
+    <MudGrid>
+        @foreach (var item in _active)
+        {
+            <MudItem xs="12" md="6">
+                <MudCard>
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6">@item.Partnership.Partner.DisplayName</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Tertiary">
+                            @item.Partnership.Partner.NativeLanguage.ToUpper()
+                        </MudText>
+                        <MudDivider Class="my-2" />
+                        <MudText>
+                            @L["Dashboard.Due"]: <strong>@item.Stats.DueCount</strong>
+                            • @L["Dashboard.New"]: <strong>@item.Stats.NewCount</strong>
+                            • @L["Dashboard.Learned"]: <strong>@item.Stats.LearnedCount</strong>
+                        </MudText>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Color="Color.Primary" Variant="Variant.Text" Href="@($"partners/{item.Partnership.Id}")">
+                            @L["Dashboard.WordsAction"]
+                        </MudButton>
+                        <MudButton Color="Color.Primary" Variant="Variant.Filled" Href="@($"partners/{item.Partnership.Id}/study")">
+                            @L["Dashboard.StudyAction"]
+                        </MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+@code {
+    private bool _loading = true;
+    private List<DashboardItem> _active = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userId = UserManager.GetUserId(authState.User);
+        if (userId is null)
+        {
+            Nav.NavigateTo("Account/Login");
+            return;
+        }
+
+        var partnerships = await PartnershipService.GetPartnershipsAsync(userId);
+        var active = partnerships.Where(p => p.Status == PartnershipStatus.Active).ToList();
+
+        var items = new List<DashboardItem>();
+        foreach (var p in active)
+        {
+            var stats = await StudyService.GetStatsAsync(p.Id, userId);
+            items.Add(new DashboardItem(p, stats));
+        }
+
+        _active = items;
+        _loading = false;
+    }
+
+    private record DashboardItem(PartnershipSummary Partnership, StudyStats Stats);
+}

@@ -1,0 +1,127 @@
+@page "/words/{WordId:guid}"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@rendermode InteractiveServer
+
+@inject IWordService WordService
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+@inject IStringLocalizer<SharedResource> L
+
+<PageTitle>@(_word?.Term ?? L["Word.AddNew"].Value)</PageTitle>
+
+@if (_word is null)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else
+{
+    <MudText Typo="Typo.h5" GutterBottom="true">
+        @_word.Term <MudText Inline="true" Typo="Typo.caption">@_word.TermLanguage.ToUpper() → @_word.TranslationLanguage.ToUpper()</MudText>
+    </MudText>
+
+    <MudPaper Class="pa-4" Elevation="0" Outlined="true">
+        <MudTextField @bind-Value="_term" Label="@L["Word.TermLabel"]" Variant="Variant.Outlined" ReadOnly="!_word.IsAuthoredByMe" Class="mb-3" />
+        <MudTextField @bind-Value="_translation" Label="@L["Word.TranslationLabel"]" Variant="Variant.Outlined" ReadOnly="!_word.IsAuthoredByMe" Class="mb-3" />
+        <MudTextField @bind-Value="_example" Label="@L["Word.ExampleLabel"]" Variant="Variant.Outlined" ReadOnly="!_word.IsAuthoredByMe" Class="mb-3" />
+        <MudTextField @bind-Value="_notes" Label="@L["Word.NotesLabel"]" Variant="Variant.Outlined" Lines="2" ReadOnly="!_word.IsAuthoredByMe" Class="mb-3" />
+        <MudTextField @bind-Value="_tagsInput" Label="@L["Word.TagsLabel"]" Variant="Variant.Outlined" ReadOnly="!_word.IsAuthoredByMe" Class="mb-3" />
+
+        @if (_word.IsAuthoredByMe)
+        {
+            <MudStack Row="true">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Save" Disabled="@_saving">
+                    @L["Common.Save"]
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="Delete">
+                    @L["Common.Delete"]
+                </MudButton>
+            </MudStack>
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Info">@L["Word.OnlyAuthorEdit"]</MudAlert>
+        }
+    </MudPaper>
+}
+
+@code {
+    [Parameter] public Guid WordId { get; set; }
+
+    private string? _userId;
+    private WordSummary? _word;
+    private string _term = "";
+    private string _translation = "";
+    private string _example = "";
+    private string _notes = "";
+    private string _tagsInput = "";
+    private bool _saving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        _userId = UserManager.GetUserId(auth.User);
+        if (_userId is null) return;
+
+        _word = await WordService.GetWordAsync(WordId, _userId);
+        if (_word is not null)
+        {
+            _term = _word.Term;
+            _translation = _word.Translation;
+            _example = _word.Example ?? "";
+            _notes = _word.Notes ?? "";
+            _tagsInput = string.Join(", ", _word.Tags);
+        }
+    }
+
+    private async Task Save()
+    {
+        if (_userId is null || _word is null) return;
+        _saving = true;
+        try
+        {
+            var tags = _tagsInput
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(t => t.Trim())
+                .Where(t => !string.IsNullOrEmpty(t))
+                .ToList();
+
+            await WordService.UpdateWordAsync(WordId, _userId,
+                new WordCreateInput(_term, _translation,
+                    string.IsNullOrWhiteSpace(_example) ? null : _example,
+                    string.IsNullOrWhiteSpace(_notes) ? null : _notes,
+                    tags));
+
+            Snackbar.Add(L["Word.Saved"].Value, Severity.Success);
+            _word = await WordService.GetWordAsync(WordId, _userId);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private async Task Delete()
+    {
+        if (_userId is null) return;
+        var confirmed = await JS.InvokeAsync<bool>("confirm", L["Word.ConfirmDelete"].Value);
+        if (!confirmed) return;
+
+        try
+        {
+            await WordService.DeleteWordAsync(WordId, _userId);
+            Snackbar.Add(L["Word.Deleted"].Value, Severity.Success);
+            Nav.NavigateTo("dashboard");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+}

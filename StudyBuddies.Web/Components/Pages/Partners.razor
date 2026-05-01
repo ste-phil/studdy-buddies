@@ -1,0 +1,147 @@
+@page "/partners"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@rendermode InteractiveServer
+
+@inject IPartnershipService PartnershipService
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
+
+<PageTitle>@L["Partners.Title"]</PageTitle>
+
+<MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4">
+    <MudText Typo="Typo.h4">@L["Partners.Title"]</MudText>
+    <MudSpacer />
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PersonSearch" Href="partners/search">
+        @L["Partners.SearchButton"]
+    </MudButton>
+</MudStack>
+
+@if (_loading)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else
+{
+    @if (_incoming.Any())
+    {
+        <MudText Typo="Typo.h6" Class="mt-4">@L["Partners.IncomingRequests"]</MudText>
+        <MudList T="PartnershipSummary" Class="mb-4">
+            @foreach (var p in _incoming)
+            {
+                <MudListItem T="PartnershipSummary">
+                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                        <MudAvatar Color="Color.Secondary">@(p.Partner.DisplayName.FirstOrDefault())</MudAvatar>
+                        <div style="flex:1">
+                            <MudText>@p.Partner.DisplayName</MudText>
+                            <MudText Typo="Typo.caption">@p.Partner.Email • @p.Partner.NativeLanguage.ToUpper()</MudText>
+                        </div>
+                        <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="() => Accept(p.Id)">@L["Partners.Accept"]</MudButton>
+                        <MudButton Color="Color.Error" Variant="Variant.Outlined" OnClick="() => Decline(p.Id)">@L["Partners.Decline"]</MudButton>
+                    </MudStack>
+                </MudListItem>
+            }
+        </MudList>
+    }
+
+    @if (_outgoing.Any())
+    {
+        <MudText Typo="Typo.h6" Class="mt-4">@L["Partners.OutgoingRequests"]</MudText>
+        <MudList T="PartnershipSummary" Class="mb-4">
+            @foreach (var p in _outgoing)
+            {
+                <MudListItem T="PartnershipSummary">
+                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                        <MudAvatar>@(p.Partner.DisplayName.FirstOrDefault())</MudAvatar>
+                        <div style="flex:1">
+                            <MudText>@p.Partner.DisplayName</MudText>
+                            <MudText Typo="Typo.caption">@p.Partner.NativeLanguage.ToUpper() • @L["Partners.Waiting"]</MudText>
+                        </div>
+                    </MudStack>
+                </MudListItem>
+            }
+        </MudList>
+    }
+
+    <MudText Typo="Typo.h6" Class="mt-4">@L["Partners.ActivePartners"]</MudText>
+    @if (!_active.Any())
+    {
+        <MudText Color="Color.Tertiary">@L["Partners.NoActive"]</MudText>
+    }
+    else
+    {
+        <MudList T="PartnershipSummary">
+            @foreach (var p in _active)
+            {
+                <MudListItem T="PartnershipSummary" Href="@($"partners/{p.Id}")">
+                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                        <MudAvatar Color="Color.Primary">@(p.Partner.DisplayName.FirstOrDefault())</MudAvatar>
+                        <div style="flex:1">
+                            <MudText>@p.Partner.DisplayName</MudText>
+                            <MudText Typo="Typo.caption">@p.Partner.NativeLanguage.ToUpper() • @L["Partners.ActiveSince"] @p.AcceptedAt?.ToShortDateString()</MudText>
+                        </div>
+                    </MudStack>
+                </MudListItem>
+            }
+        </MudList>
+    }
+}
+
+@code {
+    private bool _loading = true;
+    private string? _userId;
+    private List<PartnershipSummary> _active = new();
+    private List<PartnershipSummary> _incoming = new();
+    private List<PartnershipSummary> _outgoing = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        _userId = UserManager.GetUserId(auth.User);
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        if (_userId is null)
+        {
+            return;
+        }
+        var all = await PartnershipService.GetPartnershipsAsync(_userId);
+        _active = all.Where(p => p.Status == PartnershipStatus.Active).ToList();
+        _incoming = all.Where(p => p.Status == PartnershipStatus.Pending && p.IsIncomingRequest).ToList();
+        _outgoing = all.Where(p => p.Status == PartnershipStatus.Pending && !p.IsIncomingRequest).ToList();
+        _loading = false;
+    }
+
+    private async Task Accept(Guid partnershipId)
+    {
+        if (_userId is null) return;
+        try
+        {
+            await PartnershipService.AcceptPartnershipAsync(partnershipId, _userId);
+            Snackbar.Add(L["Partners.Accepted"].Value, Severity.Success);
+            await Load();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private async Task Decline(Guid partnershipId)
+    {
+        if (_userId is null) return;
+        try
+        {
+            await PartnershipService.DeclinePartnershipAsync(partnershipId, _userId);
+            Snackbar.Add(L["Partners.DeclinedToast"].Value, Severity.Info);
+            await Load();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+}

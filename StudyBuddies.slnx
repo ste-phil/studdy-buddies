@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="StudyBuddies.Core/StudyBuddies.Core.csproj" />
+  <Project Path="StudyBuddies.Web/StudyBuddies.Web.csproj" />
+</Solution>

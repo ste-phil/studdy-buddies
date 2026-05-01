@@ -1,0 +1,93 @@
+@page "/partners/{PartnershipId:guid}"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@rendermode InteractiveServer
+
+@inject IPartnershipService PartnershipService
+@inject IWordService WordService
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+@inject IStringLocalizer<SharedResource> L
+
+<PageTitle>@(_partnership?.Partner.DisplayName ?? "Partner")</PageTitle>
+
+@if (_loading)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (_partnership is null)
+{
+    <MudAlert Severity="Severity.Error">@L["Word.NotFound"]</MudAlert>
+}
+else
+{
+    <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4">
+        <MudAvatar Color="Color.Primary" Size="Size.Large">@(_partnership.Partner.DisplayName.FirstOrDefault())</MudAvatar>
+        <div style="flex:1">
+            <MudText Typo="Typo.h5">@_partnership.Partner.DisplayName</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Tertiary">@_partnership.Partner.NativeLanguage.ToUpper()</MudText>
+        </div>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Href="@($"partners/{PartnershipId}/words/new")">
+            @L["Word.AddNew"]
+        </MudButton>
+        <MudButton Color="Color.Secondary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.School" Href="@($"partners/{PartnershipId}/study")">
+            @L["Dashboard.StudyAction"]
+        </MudButton>
+    </MudStack>
+
+    <MudTabs Outlined="true" Position="Position.Top" Rounded="true">
+        <MudTabPanel Text="@string.Format(L["Word.IAmLearning"].Value, _forMe.Count)">
+            @if (_forMe.Count == 0)
+            {
+                <MudText Color="Color.Tertiary">@L["Word.NoForMe"]</MudText>
+            }
+            else
+            {
+                <WordsTable Words="_forMe" CurrentUserId="@_userId" />
+            }
+        </MudTabPanel>
+        <MudTabPanel Text="@string.Format(L["Word.IAuthored"].Value, _byMe.Count)">
+            @if (_byMe.Count == 0)
+            {
+                <MudText Color="Color.Tertiary">@L["Word.NoByMe"]</MudText>
+            }
+            else
+            {
+                <WordsTable Words="_byMe" CurrentUserId="@_userId" />
+            }
+        </MudTabPanel>
+    </MudTabs>
+}
+
+@code {
+    [Parameter] public Guid PartnershipId { get; set; }
+
+    private bool _loading = true;
+    private string? _userId;
+    private PartnershipSummary? _partnership;
+    private List<WordSummary> _forMe = new();
+    private List<WordSummary> _byMe = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        _userId = UserManager.GetUserId(auth.User);
+        if (_userId is null)
+        {
+            return;
+        }
+
+        _partnership = await PartnershipService.GetPartnershipAsync(PartnershipId, _userId);
+        if (_partnership is null)
+        {
+            _loading = false;
+            return;
+        }
+
+        var words = await WordService.ListWordsAsync(PartnershipId, _userId);
+        _forMe = words.Where(w => w.ForUserId == _userId).ToList();
+        _byMe = words.Where(w => w.ByUserId == _userId).ToList();
+        _loading = false;
+    }
+}

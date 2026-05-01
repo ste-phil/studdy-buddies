@@ -1,0 +1,53 @@
+@inherits ComponentBase
+@inject IStringLocalizer<SharedResource> L
+
+<MudTable Items="Words" Hover="true" Bordered="false" Striped="true" Dense="false">
+    <HeaderContent>
+        <MudTh>@L["Status.Headers.Word"]</MudTh>
+        <MudTh>@L["Status.Headers.Translation"]</MudTh>
+        <MudTh>@L["Status.Headers.Tags"]</MudTh>
+        <MudTh>@L["Status.Headers.Status"]</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>
+            <strong>@context.Term</strong>
+            <MudText Typo="Typo.caption" Color="Color.Tertiary">@context.TermLanguage.ToUpper()</MudText>
+        </MudTd>
+        <MudTd>
+            @context.Translation
+            <MudText Typo="Typo.caption" Color="Color.Tertiary">@context.TranslationLanguage.ToUpper()</MudText>
+        </MudTd>
+        <MudTd>
+            @foreach (var tag in context.Tags)
+            {
+                <MudChip T="string" Size="Size.Small" Color="Color.Default">@tag</MudChip>
+            }
+        </MudTd>
+        <MudTd>
+            @if (context.DueDate is null)
+            {
+                <MudChip T="string" Size="Size.Small" Color="Color.Info">@L["Status.New"]</MudChip>
+            }
+            else if (context.DueDate <= DateTime.UtcNow.Date.AddDays(1))
+            {
+                <MudChip T="string" Size="Size.Small" Color="Color.Warning">@L["Status.Due"]</MudChip>
+            }
+            else
+            {
+                <MudChip T="string" Size="Size.Small" Color="Color.Success">@context.DueDate.Value.ToShortDateString()</MudChip>
+            }
+        </MudTd>
+        <MudTd>
+            @if (context.IsAuthoredByMe)
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Href="@($"words/{context.Id}")" />
+            }
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    [Parameter, EditorRequired] public List<WordSummary> Words { get; set; } = new();
+    [Parameter, EditorRequired] public string? CurrentUserId { get; set; }
+}

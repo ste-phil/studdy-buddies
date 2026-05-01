@@ -1,0 +1,46 @@
+@rendermode InteractiveServer
+@inject IJSRuntime JS
+@inject Microsoft.Extensions.Localization.IStringLocalizer<StudyBuddies.Web.SharedResource> L
+
+<MudMenu Icon="@Icons.Material.Filled.Translate" Color="Color.Inherit" AriaLabel="@L["Lang.SwitchTooltip"]">
+    <MudMenuItem OnClick="@(() => SetCulture("de"))">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            @if (_current == "de")
+            {
+                <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" />
+            }
+            else
+            {
+                <MudIcon Icon="@Icons.Material.Filled.Language" Size="Size.Small" />
+            }
+            <MudText>@L["Lang.German"]</MudText>
+        </MudStack>
+    </MudMenuItem>
+    <MudMenuItem OnClick="@(() => SetCulture("es"))">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            @if (_current == "es")
+            {
+                <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" />
+            }
+            else
+            {
+                <MudIcon Icon="@Icons.Material.Filled.Language" Size="Size.Small" />
+            }
+            <MudText>@L["Lang.Spanish"]</MudText>
+        </MudStack>
+    </MudMenuItem>
+</MudMenu>
+
+@code {
+    private string _current = "es";
+
+    protected override void OnInitialized()
+    {
+        _current = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+    }
+
+    private async Task SetCulture(string culture)
+    {
+        await JS.InvokeVoidAsync("studyBuddiesLang.set", culture);
+    }
+}

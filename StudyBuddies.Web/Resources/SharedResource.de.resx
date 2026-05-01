@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <data name="App.Title" xml:space="preserve"><value>StudyBuddies</value></data>
+  <data name="Lang.SwitchTooltip" xml:space="preserve"><value>Sprache wechseln</value></data>
+  <data name="Lang.German" xml:space="preserve"><value>Deutsch</value></data>
+  <data name="Lang.Spanish" xml:space="preserve"><value>Spanisch</value></data>
+
+  <data name="Auth.Login" xml:space="preserve"><value>Anmelden</value></data>
+  <data name="Auth.Logout" xml:space="preserve"><value>Abmelden</value></data>
+  <data name="Auth.Register" xml:space="preserve"><value>Registrieren</value></data>
+
+  <data name="Nav.Home" xml:space="preserve"><value>Start</value></data>
+  <data name="Nav.Dashboard" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="Nav.Partners" xml:space="preserve"><value>Partner</value></data>
+  <data name="Nav.SearchPartners" xml:space="preserve"><value>Partner suchen</value></data>
+  <data name="Nav.Profile" xml:space="preserve"><value>Profil</value></data>
+
+  <data name="Common.Save" xml:space="preserve"><value>Speichern</value></data>
+  <data name="Common.Cancel" xml:space="preserve"><value>Abbrechen</value></data>
+  <data name="Common.Delete" xml:space="preserve"><value>Löschen</value></data>
+  <data name="Common.Edit" xml:space="preserve"><value>Bearbeiten</value></data>
+  <data name="Common.Back" xml:space="preserve"><value>Zurück</value></data>
+  <data name="Common.Loading" xml:space="preserve"><value>Lädt …</value></data>
+
+  <data name="Home.Welcome" xml:space="preserve"><value>Willkommen bei StudyBuddies!</value></data>
+  <data name="Home.Description" xml:space="preserve"><value>Lerne mit einem Partner Vokabeln. Jeder fügt Wörter in seiner Muttersprache ein, der Partner lernt sie als Karteikarten.</value></data>
+  <data name="Home.GoToDashboard" xml:space="preserve"><value>Zum Dashboard</value></data>
+
+  <data name="Dashboard.Title" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="Dashboard.NoPartners" xml:space="preserve"><value>Du hast noch keinen aktiven Lernpartner. Suche einen unter "Partner suchen".</value></data>
+  <data name="Dashboard.Due" xml:space="preserve"><value>Fällig</value></data>
+  <data name="Dashboard.New" xml:space="preserve"><value>Neu</value></data>
+  <data name="Dashboard.Learned" xml:space="preserve"><value>Gelernt</value></data>
+  <data name="Dashboard.WordsAction" xml:space="preserve"><value>Wörter</value></data>
+  <data name="Dashboard.StudyAction" xml:space="preserve"><value>Lernen</value></data>
+
+  <data name="Partners.Title" xml:space="preserve"><value>Partner</value></data>
+  <data name="Partners.SearchButton" xml:space="preserve"><value>Partner suchen</value></data>
+  <data name="Partners.IncomingRequests" xml:space="preserve"><value>Eingehende Anfragen</value></data>
+  <data name="Partners.OutgoingRequests" xml:space="preserve"><value>Gesendete Anfragen</value></data>
+  <data name="Partners.ActivePartners" xml:space="preserve"><value>Aktive Partner</value></data>
+  <data name="Partners.NoActive" xml:space="preserve"><value>Noch keine aktiven Partner.</value></data>
+  <data name="Partners.Accept" xml:space="preserve"><value>Annehmen</value></data>
+  <data name="Partners.Decline" xml:space="preserve"><value>Ablehnen</value></data>
+  <data name="Partners.Waiting" xml:space="preserve"><value>Wartet auf Antwort</value></data>
+  <data name="Partners.ActiveSince" xml:space="preserve"><value>Aktiv seit</value></data>
+  <data name="Partners.Accepted" xml:space="preserve"><value>Partnerschaft aktiv!</value></data>
+  <data name="Partners.DeclinedToast" xml:space="preserve"><value>Anfrage abgelehnt</value></data>
+
+  <data name="Search.Title" xml:space="preserve"><value>Partner suchen</value></data>
+  <data name="Search.Label" xml:space="preserve"><value>Name oder Email</value></data>
+  <data name="Search.NoResults" xml:space="preserve"><value>Keine Treffer.</value></data>
+  <data name="Search.SendRequest" xml:space="preserve"><value>Anfrage senden</value></data>
+  <data name="Search.RequestSent" xml:space="preserve"><value>Anfrage gesendet</value></data>
+
+  <data name="Word.New" xml:space="preserve"><value>Neues Wort für {0}</value></data>
+  <data name="Word.NewSubtext" xml:space="preserve"><value>Term in deiner Sprache ({0}), Übersetzung in der Sprache deines Partners ({1}).</value></data>
+  <data name="Word.TermLabel" xml:space="preserve"><value>Wort</value></data>
+  <data name="Word.TranslationLabel" xml:space="preserve"><value>Übersetzung</value></data>
+  <data name="Word.ExampleLabel" xml:space="preserve"><value>Beispielsatz</value></data>
+  <data name="Word.NotesLabel" xml:space="preserve"><value>Notizen (Genus, Konjugation)</value></data>
+  <data name="Word.TagsLabel" xml:space="preserve"><value>Tags (Komma-getrennt)</value></data>
+  <data name="Word.AddNew" xml:space="preserve"><value>Wort</value></data>
+  <data name="Word.IAmLearning" xml:space="preserve"><value>Ich lerne ({0})</value></data>
+  <data name="Word.IAuthored" xml:space="preserve"><value>Erstellt von mir ({0})</value></data>
+  <data name="Word.NoForMe" xml:space="preserve"><value>Dein Partner hat noch keine Wörter für dich angelegt.</value></data>
+  <data name="Word.NoByMe" xml:space="preserve"><value>Du hast noch keine Wörter für deinen Partner angelegt.</value></data>
+  <data name="Word.OnlyAuthorEdit" xml:space="preserve"><value>Nur der Autor kann dieses Wort bearbeiten.</value></data>
+  <data name="Word.ConfirmDelete" xml:space="preserve"><value>Dieses Wort wirklich löschen?</value></data>
+  <data name="Word.Saved" xml:space="preserve"><value>Wort gespeichert</value></data>
+  <data name="Word.Deleted" xml:space="preserve"><value>Gelöscht</value></data>
+
+  <data name="Word.NotFound" xml:space="preserve"><value>Partnerschaft nicht gefunden.</value></data>
+
+  <data name="Status.New" xml:space="preserve"><value>Neu</value></data>
+  <data name="Status.Due" xml:space="preserve"><value>Fällig</value></data>
+  <data name="Status.Headers.Word" xml:space="preserve"><value>Wort</value></data>
+  <data name="Status.Headers.Translation" xml:space="preserve"><value>Übersetzung</value></data>
+  <data name="Status.Headers.Tags" xml:space="preserve"><value>Tags</value></data>
+  <data name="Status.Headers.Status" xml:space="preserve"><value>Status</value></data>
+
+  <data name="Study.Title" xml:space="preserve"><value>Lernen</value></data>
+  <data name="Study.Remaining" xml:space="preserve"><value>{0} verbleibend</value></data>
+  <data name="Study.NoCards" xml:space="preserve"><value>Keine Karten fällig — gut gemacht!</value></data>
+  <data name="Study.ShowAnswer" xml:space="preserve"><value>Antwort zeigen</value></data>
+  <data name="Study.GoBack" xml:space="preserve"><value>Zurück</value></data>
+  <data name="Study.Bad" xml:space="preserve"><value>Schlecht</value></data>
+  <data name="Study.Hard" xml:space="preserve"><value>Schwer</value></data>
+  <data name="Study.Good" xml:space="preserve"><value>Gut</value></data>
+  <data name="Study.Easy" xml:space="preserve"><value>Einfach</value></data>
+
+  <data name="Register.DisplayName" xml:space="preserve"><value>Anzeigename</value></data>
+  <data name="Register.NativeLanguage" xml:space="preserve"><value>Muttersprache</value></data>
+  <data name="Register.SelectLanguage" xml:space="preserve"><value>-- Muttersprache wählen --</value></data>
+
+</root>

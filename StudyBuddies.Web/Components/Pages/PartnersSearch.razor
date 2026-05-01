@@ -1,0 +1,101 @@
+@page "/partners/search"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@rendermode InteractiveServer
+
+@inject IPartnershipService PartnershipService
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+@inject IStringLocalizer<SharedResource> L
+
+<PageTitle>@L["Search.Title"]</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">@L["Search.Title"]</MudText>
+
+<MudPaper Class="pa-4 mb-4" Elevation="0" Outlined="true">
+    <MudTextField @bind-Value="_query"
+                  Label="@L["Search.Label"]"
+                  Variant="Variant.Outlined"
+                  Adornment="Adornment.End"
+                  AdornmentIcon="@Icons.Material.Filled.Search"
+                  Immediate="true"
+                  DebounceInterval="300"
+                  OnDebounceIntervalElapsed="OnSearch" />
+</MudPaper>
+
+@if (_searching)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (_results is { Count: 0 } && !string.IsNullOrWhiteSpace(_query))
+{
+    <MudText Color="Color.Tertiary">@L["Search.NoResults"]</MudText>
+}
+else if (_results is { Count: > 0 })
+{
+    <MudList T="UserSummary">
+        @foreach (var u in _results)
+        {
+            <MudListItem T="UserSummary">
+                <MudStack Row="true" AlignItems="AlignItems.Center">
+                    <MudAvatar Color="Color.Primary">@(u.DisplayName.FirstOrDefault())</MudAvatar>
+                    <div style="flex:1">
+                        <MudText>@u.DisplayName</MudText>
+                        <MudText Typo="Typo.caption">@u.Email • @u.NativeLanguage.ToUpper()</MudText>
+                    </div>
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="() => SendRequest(u.Id)">
+                        @L["Search.SendRequest"]
+                    </MudButton>
+                </MudStack>
+            </MudListItem>
+        }
+    </MudList>
+}
+
+@code {
+    private string _query = "";
+    private bool _searching;
+    private List<UserSummary>? _results;
+    private string? _userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        _userId = UserManager.GetUserId(auth.User);
+    }
+
+    private async Task OnSearch()
+    {
+        if (_userId is null || string.IsNullOrWhiteSpace(_query))
+        {
+            _results = null;
+            return;
+        }
+
+        _searching = true;
+        try
+        {
+            _results = await PartnershipService.SearchUsersAsync(_query, _userId);
+        }
+        finally
+        {
+            _searching = false;
+        }
+    }
+
+    private async Task SendRequest(string toUserId)
+    {
+        if (_userId is null) return;
+        try
+        {
+            await PartnershipService.RequestPartnershipAsync(_userId, toUserId);
+            Snackbar.Add(L["Search.RequestSent"].Value, Severity.Success);
+            Nav.NavigateTo("partners");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+}

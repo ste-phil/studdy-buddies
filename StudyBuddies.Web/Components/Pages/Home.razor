@@ -1,0 +1,25 @@
+@page "/"
+@inject IStringLocalizer<SharedResource> L
+
+<PageTitle>@L["App.Title"]</PageTitle>
+
+<MudPaper Class="pa-8" Elevation="0">
+    <MudText Typo="Typo.h3" GutterBottom="true">@L["Home.Welcome"]</MudText>
+    <MudText Typo="Typo.body1" Class="mb-4">@L["Home.Description"]</MudText>
+
+    <AuthorizeView>
+        <Authorized>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="dashboard" Size="Size.Large">
+                @L["Home.GoToDashboard"]
+            </MudButton>
+        </Authorized>
+        <NotAuthorized>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="Account/Register" Size="Size.Large" Class="mr-2">
+                @L["Auth.Register"]
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="Account/Login" Size="Size.Large">
+                @L["Auth.Login"]
+            </MudButton>
+        </NotAuthorized>
+    </AuthorizeView>
+</MudPaper>

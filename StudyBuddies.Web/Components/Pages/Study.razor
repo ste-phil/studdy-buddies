@@ -1,0 +1,127 @@
+@page "/partners/{PartnershipId:guid}/study"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@rendermode InteractiveServer
+
+@inject IStudyService StudyService
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JS
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+@inject IStringLocalizer<SharedResource> L
+
+<PageTitle>@L["Study.Title"]</PageTitle>
+
+<MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4">
+    <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Href="@($"partners/{PartnershipId}")" />
+    <MudText Typo="Typo.h5">@L["Study.Title"]</MudText>
+    <MudSpacer />
+    <MudText Typo="Typo.caption">@string.Format(L["Study.Remaining"].Value, _remaining)</MudText>
+</MudStack>
+
+@if (_loading)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (_currentCard is null)
+{
+    <MudPaper Class="pa-8 text-center" Elevation="0" Outlined="true">
+        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Large" />
+        <MudText Typo="Typo.h5" Class="mt-4">@L["Study.NoCards"]</MudText>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="@($"partners/{PartnershipId}")" Class="mt-4">
+            @L["Study.GoBack"]
+        </MudButton>
+    </MudPaper>
+}
+else
+{
+    <MudPaper Class="pa-8 mb-4" Elevation="3" Style="min-height: 280px;">
+        <MudStack AlignItems="AlignItems.Center" Spacing="4">
+            <MudText Typo="Typo.caption" Color="Color.Tertiary">@_currentCard.TermLanguage.ToUpper()</MudText>
+            <MudText Typo="Typo.h3" Align="Align.Center">@_currentCard.Term</MudText>
+            <MudIconButton Icon="@Icons.Material.Filled.VolumeUp" OnClick="SpeakTerm" Color="Color.Primary" />
+
+            @if (_revealed)
+            {
+                <MudDivider Class="my-2" Style="width:100%" />
+                <MudText Typo="Typo.caption" Color="Color.Tertiary">@_currentCard.TranslationLanguage.ToUpper()</MudText>
+                <MudText Typo="Typo.h4" Align="Align.Center">@_currentCard.Translation</MudText>
+                @if (!string.IsNullOrWhiteSpace(_currentCard.Example))
+                {
+                    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">@_currentCard.Example</MudAlert>
+                }
+                @if (!string.IsNullOrWhiteSpace(_currentCard.Notes))
+                {
+                    <MudText Typo="Typo.body2" Color="Color.Tertiary">@_currentCard.Notes</MudText>
+                }
+            }
+        </MudStack>
+    </MudPaper>
+
+    @if (!_revealed)
+    {
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" FullWidth="true" OnClick="() => _revealed = true">
+            @L["Study.ShowAnswer"]
+        </MudButton>
+    }
+    else
+    {
+        <MudGrid>
+            <MudItem xs="3"><MudButton Variant="Variant.Filled" Color="Color.Error" FullWidth="true" OnClick="() => Grade(ReviewGrade.Bad)">@L["Study.Bad"]</MudButton></MudItem>
+            <MudItem xs="3"><MudButton Variant="Variant.Filled" Color="Color.Warning" FullWidth="true" OnClick="() => Grade(ReviewGrade.Hard)">@L["Study.Hard"]</MudButton></MudItem>
+            <MudItem xs="3"><MudButton Variant="Variant.Filled" Color="Color.Success" FullWidth="true" OnClick="() => Grade(ReviewGrade.Good)">@L["Study.Good"]</MudButton></MudItem>
+            <MudItem xs="3"><MudButton Variant="Variant.Filled" Color="Color.Info" FullWidth="true" OnClick="() => Grade(ReviewGrade.Easy)">@L["Study.Easy"]</MudButton></MudItem>
+        </MudGrid>
+    }
+}
+
+@code {
+    [Parameter] public Guid PartnershipId { get; set; }
+
+    private bool _loading = true;
+    private string? _userId;
+    private Queue<StudyCard> _queue = new();
+    private StudyCard? _currentCard;
+    private bool _revealed;
+    private int _remaining;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        _userId = UserManager.GetUserId(auth.User);
+        if (_userId is null) return;
+
+        var cards = await StudyService.GetDueCardsAsync(PartnershipId, _userId);
+        _queue = new Queue<StudyCard>(cards);
+        _remaining = _queue.Count;
+        Next();
+        _loading = false;
+    }
+
+    private void Next()
+    {
+        _revealed = false;
+        _currentCard = _queue.Count > 0 ? _queue.Dequeue() : null;
+        _remaining = _queue.Count + (_currentCard is null ? 0 : 1);
+    }
+
+    private async Task Grade(ReviewGrade grade)
+    {
+        if (_userId is null || _currentCard is null) return;
+        try
+        {
+            await StudyService.GradeAsync(_currentCard.WordId, _userId, grade);
+            Next();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private async Task SpeakTerm()
+    {
+        if (_currentCard is null) return;
+        await JS.InvokeVoidAsync("studyBuddiesSpeech.speak", _currentCard.Term, _currentCard.TermLanguage);
+    }
+}
