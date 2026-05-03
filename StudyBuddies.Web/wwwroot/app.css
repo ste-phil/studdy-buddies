@@ -73,37 +73,34 @@ h1:focus {
     border-radius: 50%;
     background-size: cover;
     background-position: center;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.6), 0 1px 3px rgba(0, 0, 0, 0.18);
 }
 
 .lang-flag-circle-lg {
-    width: 1.85rem;
-    height: 1.85rem;
+    width: 1.75rem;
+    height: 1.75rem;
 }
 
 .lang-switcher-trigger {
-    background: rgba(255, 255, 255, 0.14);
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    padding: 3px;
-    border-radius: 50%;
+    background: transparent;
+    border: none;
+    padding: 0;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
     line-height: 0;
     margin: 0 4px;
+    transition: transform 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .lang-switcher-trigger:hover {
-    background: rgba(255, 255, 255, 0.24);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
     transform: translateY(-1px);
 }
 
+.lang-switcher-trigger:focus,
 .lang-switcher-trigger:focus-visible {
-    outline: 2px solid #fff;
-    outline-offset: 2px;
+    outline: none;
 }
 
 .partner-chip {

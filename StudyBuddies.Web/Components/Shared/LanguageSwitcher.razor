@@ -8,7 +8,8 @@
         <button type="button"
                 class="lang-switcher-trigger"
                 aria-label="@L["Lang.SwitchTooltip"]"
-                title="@L["Lang.SwitchTooltip"]">
+                title="@L["Lang.SwitchTooltip"]"
+                @onclick="@context.ToggleAsync">
             <span class="lang-flag-circle lang-flag-circle-lg fi fis fi-@(_current)"></span>
         </button>
     </ActivatorContent>
