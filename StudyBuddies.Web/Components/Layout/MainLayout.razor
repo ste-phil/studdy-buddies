@@ -1,25 +1,25 @@
 @inherits LayoutComponentBase
 @inject Microsoft.Extensions.Localization.IStringLocalizer<StudyBuddies.Web.SharedResource> L
 
-<MudThemeProvider IsDarkMode="false" />
+<MudThemeProvider Theme="@_theme" IsDarkMode="false" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
-        <MudText Typo="Typo.h6" Class="ml-2">@L["App.Title"]</MudText>
+    <MudAppBar Elevation="1" Dense="true">
+        <MudLink Href="/" Color="Color.Inherit" Underline="Underline.None">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                <MudIcon Icon="@Icons.Material.Filled.School" Color="Color.Inherit" />
+                <MudText Typo="Typo.h6">@L["App.Title"]</MudText>
+            </MudStack>
+        </MudLink>
         <MudSpacer />
         <LanguageSwitcher />
         <AuthorizeView>
             <Authorized>
-                <MudText Typo="Typo.body2" Class="mx-2">@context.User.Identity?.Name</MudText>
-                <form action="Account/Logout" method="post" style="display:inline">
-                    <AntiforgeryToken />
-                    <input type="hidden" name="ReturnUrl" value="/" />
-                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Text" Color="Color.Inherit">@L["Auth.Logout"]</MudButton>
-                </form>
+                <IncomingRequestBadge />
+                <UserMenu DisplayName="@(context.User.Identity?.Name ?? string.Empty)" />
             </Authorized>
             <NotAuthorized>
                 <MudButton Href="Account/Login" Variant="Variant.Text" Color="Color.Inherit">@L["Auth.Login"]</MudButton>
@@ -28,12 +28,8 @@
         </AuthorizeView>
     </MudAppBar>
 
-    <MudDrawer @bind-Open="@_drawerOpen" Elevation="1" Variant="DrawerVariant.Responsive" ClipMode="DrawerClipMode.Always">
-        <NavMenu />
-    </MudDrawer>
-
     <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Large" Class="pa-4">
+        <MudContainer MaxWidth="MaxWidth.Medium" Class="pa-4">
             @Body
         </MudContainer>
     </MudMainContent>
@@ -46,7 +42,33 @@
 </div>
 
 @code {
-    private bool _drawerOpen = true;
-
-    private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
+    private readonly MudTheme _theme = new()
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#6366F1",
+            Secondary = "#EC4899",
+            Tertiary = "#8B5CF6",
+            Success = "#10B981",
+            Warning = "#F59E0B",
+            Info = "#3B82F6",
+            AppbarBackground = "#6366F1",
+            AppbarText = "#FFFFFF",
+            Background = "#F8FAFC",
+            Surface = "#FFFFFF",
+            DrawerBackground = "#FFFFFF",
+            LinesDefault = "#E5E7EB"
+        },
+        Typography = new Typography
+        {
+            Default = new DefaultTypography
+            {
+                FontFamily = new[] { "Inter", "Helvetica Neue", "Helvetica", "Arial", "sans-serif" }
+            }
+        },
+        LayoutProperties = new LayoutProperties
+        {
+            DefaultBorderRadius = "10px"
+        }
+    };
 }

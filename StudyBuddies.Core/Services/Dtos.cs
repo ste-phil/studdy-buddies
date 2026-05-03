@@ -42,3 +42,11 @@ public record StudyCard(
     string TranslationLanguage,
     string? Example,
     string? Notes);
+
+public record DashboardStats(
+    int DueCount,
+    int NewCount,
+    int LearnedCount,
+    int Streak,
+    int TodayCount,
+    int DailyGoal);

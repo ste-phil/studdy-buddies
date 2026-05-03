@@ -1,0 +1,17 @@
+<div class="flip-card @(IsFlipped ? "is-flipped" : "")" @onclick="OnClick">
+    <div class="flip-card-inner">
+        <div class="flip-card-front">
+            @FrontContent
+        </div>
+        <div class="flip-card-back">
+            @BackContent
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool IsFlipped { get; set; }
+    [Parameter] public RenderFragment? FrontContent { get; set; }
+    [Parameter] public RenderFragment? BackContent { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+}

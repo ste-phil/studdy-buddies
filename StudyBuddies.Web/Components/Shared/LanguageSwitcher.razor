@@ -1,34 +1,39 @@
-@rendermode InteractiveServer
 @inject IJSRuntime JS
 @inject Microsoft.Extensions.Localization.IStringLocalizer<StudyBuddies.Web.SharedResource> L
 
-<MudMenu Icon="@Icons.Material.Filled.Translate" Color="Color.Inherit" AriaLabel="@L["Lang.SwitchTooltip"]">
-    <MudMenuItem OnClick="@(() => SetCulture("de"))">
-        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-            @if (_current == "de")
-            {
-                <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" />
-            }
-            else
-            {
-                <MudIcon Icon="@Icons.Material.Filled.Language" Size="Size.Small" />
-            }
-            <MudText>@L["Lang.German"]</MudText>
-        </MudStack>
-    </MudMenuItem>
-    <MudMenuItem OnClick="@(() => SetCulture("es"))">
-        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-            @if (_current == "es")
-            {
-                <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" />
-            }
-            else
-            {
-                <MudIcon Icon="@Icons.Material.Filled.Language" Size="Size.Small" />
-            }
-            <MudText>@L["Lang.Spanish"]</MudText>
-        </MudStack>
-    </MudMenuItem>
+<MudMenu AnchorOrigin="Origin.BottomRight"
+         TransformOrigin="Origin.TopRight"
+         Dense="true">
+    <ActivatorContent>
+        <button type="button"
+                class="lang-switcher-trigger"
+                aria-label="@L["Lang.SwitchTooltip"]"
+                title="@L["Lang.SwitchTooltip"]">
+            <span class="lang-flag-circle lang-flag-circle-lg fi fis fi-@(_current)"></span>
+        </button>
+    </ActivatorContent>
+    <ChildContent>
+        <MudMenuItem OnClick="@(() => SetCulture("de"))">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                <span class="lang-flag-circle fi fis fi-de"></span>
+                <MudText>@L["Lang.German"]</MudText>
+                @if (_current == "de")
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Color="Color.Success" />
+                }
+            </MudStack>
+        </MudMenuItem>
+        <MudMenuItem OnClick="@(() => SetCulture("es"))">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                <span class="lang-flag-circle fi fis fi-es"></span>
+                <MudText>@L["Lang.Spanish"]</MudText>
+                @if (_current == "es")
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Color="Color.Success" />
+                }
+            </MudStack>
+        </MudMenuItem>
+    </ChildContent>
 </MudMenu>
 
 @code {

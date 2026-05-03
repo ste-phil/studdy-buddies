@@ -1,0 +1,87 @@
+@inject IPartnershipService PartnershipService
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
+@inject IStringLocalizer<SharedResource> L
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">@L["PartnerSwitcher.Title"]</MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (_loading)
+        {
+            <MudProgressCircular Indeterminate="true" />
+        }
+        else
+        {
+            @if (_others.Count > 0)
+            {
+                <MudText Typo="Typo.subtitle2" Class="mb-2">@L["PartnerSwitcher.Active"]</MudText>
+                <MudList T="PartnershipSummary" Dense="true">
+                    @foreach (var p in _others)
+                    {
+                        <MudListItem T="PartnershipSummary" OnClick="@(() => Switch(p.Id))">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudAvatar Color="Color.Primary" Size="Size.Small">
+                                    @(p.Partner.DisplayName.FirstOrDefault())
+                                </MudAvatar>
+                                <div style="flex:1">
+                                    <MudText>@p.Partner.DisplayName</MudText>
+                                    <MudText Typo="Typo.caption">@p.Partner.NativeLanguage.ToUpper()</MudText>
+                                </div>
+                            </MudStack>
+                        </MudListItem>
+                    }
+                </MudList>
+                <MudDivider Class="my-2" />
+            }
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.PersonSearch"
+                       FullWidth="true"
+                       OnClick="FindNew">
+                @L["PartnerSwitcher.FindNew"]
+            </MudButton>
+        }
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] public Guid CurrentPartnershipId { get; set; }
+
+    private bool _loading = true;
+    private List<PartnershipSummary> _others = new();
+    private string? _userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        _userId = UserManager.GetUserId(auth.User);
+        if (_userId is null)
+        {
+            _loading = false;
+            return;
+        }
+        var all = await PartnershipService.GetPartnershipsAsync(_userId);
+        _others = all
+            .Where(p => p.Status == PartnershipStatus.Active && p.Id != CurrentPartnershipId)
+            .ToList();
+        _loading = false;
+    }
+
+    private async Task Switch(Guid partnershipId)
+    {
+        if (_userId is null) return;
+        await PartnershipService.SetLastUsedPartnershipAsync(_userId, partnershipId);
+        MudDialog.Close(DialogResult.Ok(partnershipId));
+    }
+
+    private void FindNew()
+    {
+        MudDialog.Close(DialogResult.Cancel());
+        Nav.NavigateTo("/partners/search");
+    }
+}

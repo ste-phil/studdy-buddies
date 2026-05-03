@@ -1,0 +1,49 @@
+@inject IStringLocalizer<SharedResource> L
+
+<MudPaper Class="pa-8 d-flex flex-column align-center" Elevation="0">
+    <div class="icon-circle icon-circle-lg icon-circle-primary" style="width:96px;height:96px;">
+        <MudIcon Icon="@Icons.Material.Filled.School" Style="font-size:3.5rem" />
+    </div>
+    <MudText Typo="Typo.h5" Align="Align.Center" Class="mt-4">@L["Dashboard.Welcome.Title"]</MudText>
+    <MudText Typo="Typo.body1" Align="Align.Center" Class="mt-2 mb-6" Style="color:#64748B;max-width:32rem;">
+        @L["Dashboard.Welcome.Body"]
+    </MudText>
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               Size="Size.Large"
+               StartIcon="@Icons.Material.Filled.PersonSearch"
+               Href="/partners/search">
+        @L["Dashboard.Welcome.FindPartner"]
+    </MudButton>
+</MudPaper>
+
+<MudText Typo="Typo.h6" Align="Align.Center" Class="mt-8 mb-4">@L["Welcome.HowItWorks.Title"]</MudText>
+<MudGrid Spacing="3">
+    <MudItem xs="12" sm="4">
+        <div class="howitworks-step">
+            <div class="howitworks-step-icon">
+                <MudIcon Icon="@Icons.Material.Filled.Handshake" Style="font-size:2rem" />
+            </div>
+            <div class="howitworks-step-title">@L["Welcome.HowItWorks.Step1.Title"]</div>
+            <div class="howitworks-step-body">@L["Welcome.HowItWorks.Step1.Body"]</div>
+        </div>
+    </MudItem>
+    <MudItem xs="12" sm="4">
+        <div class="howitworks-step">
+            <div class="howitworks-step-icon">
+                <MudIcon Icon="@Icons.Material.Filled.EditNote" Style="font-size:2rem" />
+            </div>
+            <div class="howitworks-step-title">@L["Welcome.HowItWorks.Step2.Title"]</div>
+            <div class="howitworks-step-body">@L["Welcome.HowItWorks.Step2.Body"]</div>
+        </div>
+    </MudItem>
+    <MudItem xs="12" sm="4">
+        <div class="howitworks-step">
+            <div class="howitworks-step-icon">
+                <MudIcon Icon="@Icons.Material.Filled.School" Style="font-size:2rem" />
+            </div>
+            <div class="howitworks-step-title">@L["Welcome.HowItWorks.Step3.Title"]</div>
+            <div class="howitworks-step-body">@L["Welcome.HowItWorks.Step3.Body"]</div>
+        </div>
+    </MudItem>
+</MudGrid>

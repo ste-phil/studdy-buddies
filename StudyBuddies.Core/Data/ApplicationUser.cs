@@ -10,6 +10,8 @@ public class ApplicationUser : IdentityUser
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public Guid? LastUsedPartnershipId { get; set; }
+
     public ICollection<Partnership> PartnershipsAsUserA { get; set; } = new List<Partnership>();
 
     public ICollection<Partnership> PartnershipsAsUserB { get; set; } = new List<Partnership>();

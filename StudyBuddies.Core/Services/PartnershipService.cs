@@ -171,6 +171,74 @@ public class PartnershipService(ApplicationDbContext db) : IPartnershipService
             p.AcceptedAt);
     }
 
+    public async Task<PartnershipSummary?> GetCurrentPartnershipAsync(string userId, CancellationToken ct = default)
+    {
+        var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId, ct);
+        if (user is null)
+        {
+            return null;
+        }
+
+        var activePartnerships = await db.Partnerships
+            .AsNoTracking()
+            .Where(p => (p.UserAId == userId || p.UserBId == userId) && p.Status == PartnershipStatus.Active)
+            .Include(p => p.UserA)
+            .Include(p => p.UserB)
+            .ToListAsync(ct);
+
+        if (activePartnerships.Count == 0)
+        {
+            return null;
+        }
+
+        var preferred = user.LastUsedPartnershipId is { } lastId
+            ? activePartnerships.FirstOrDefault(p => p.Id == lastId)
+            : null;
+
+        var chosen = preferred ?? activePartnerships
+            .OrderByDescending(p => p.AcceptedAt ?? p.CreatedAt)
+            .First();
+
+        var partner = chosen.UserAId == userId ? chosen.UserB : chosen.UserA;
+        return new PartnershipSummary(
+            chosen.Id,
+            new UserSummary(partner.Id, partner.DisplayName, partner.Email ?? "", partner.NativeLanguage),
+            chosen.Status,
+            false,
+            chosen.CreatedAt,
+            chosen.AcceptedAt);
+    }
+
+    public async Task SetLastUsedPartnershipAsync(string userId, Guid partnershipId, CancellationToken ct = default)
+    {
+        var partnership = await db.Partnerships
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Id == partnershipId, ct);
+
+        if (partnership is null
+            || partnership.Status != PartnershipStatus.Active
+            || (partnership.UserAId != userId && partnership.UserBId != userId))
+        {
+            return;
+        }
+
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId, ct);
+        if (user is null)
+        {
+            return;
+        }
+
+        user.LastUsedPartnershipId = partnershipId;
+        await db.SaveChangesAsync(ct);
+    }
+
+    public Task<int> GetIncomingRequestCountAsync(string userId, CancellationToken ct = default)
+        => db.Partnerships
+            .AsNoTracking()
+            .CountAsync(p => (p.UserAId == userId || p.UserBId == userId)
+                && p.Status == PartnershipStatus.Pending
+                && p.RequestedById != userId, ct);
+
     private static (string userAId, string userBId) SortIds(string a, string b)
         => string.CompareOrdinal(a, b) < 0 ? (a, b) : (b, a);
 }

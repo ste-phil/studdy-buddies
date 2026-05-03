@@ -1,86 +1,236 @@
+@page "/"
 @page "/dashboard"
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @rendermode InteractiveServer
 
 @inject IPartnershipService PartnershipService
-@inject IStudyService StudyService
+@inject IStudyService Study
+@inject IStreakService StreakService
 @inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> UserManager
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Nav
+@inject IDialogService DialogService
 @inject IStringLocalizer<SharedResource> L
 
 <PageTitle>@L["Dashboard.Title"]</PageTitle>
 
-<MudText Typo="Typo.h4" GutterBottom="true">@L["Dashboard.Title"]</MudText>
-
 @if (_loading)
 {
-    <MudProgressCircular Indeterminate="true" />
+    <div class="d-flex justify-center pa-12">
+        <MudProgressCircular Indeterminate="true" />
+    </div>
 }
-else if (_active.Count == 0)
+else if (_current is null)
 {
-    <MudAlert Severity="Severity.Info" Class="mb-4">@L["Dashboard.NoPartners"]</MudAlert>
+    <WelcomeEmptyState />
 }
 else
 {
-    <MudGrid>
-        @foreach (var item in _active)
-        {
-            <MudItem xs="12" md="6">
-                <MudCard>
-                    <MudCardContent>
-                        <MudText Typo="Typo.h6">@item.Partnership.Partner.DisplayName</MudText>
-                        <MudText Typo="Typo.body2" Color="Color.Tertiary">
-                            @item.Partnership.Partner.NativeLanguage.ToUpper()
-                        </MudText>
-                        <MudDivider Class="my-2" />
-                        <MudText>
-                            @L["Dashboard.Due"]: <strong>@item.Stats.DueCount</strong>
-                            • @L["Dashboard.New"]: <strong>@item.Stats.NewCount</strong>
-                            • @L["Dashboard.Learned"]: <strong>@item.Stats.LearnedCount</strong>
-                        </MudText>
-                    </MudCardContent>
-                    <MudCardActions>
-                        <MudButton Color="Color.Primary" Variant="Variant.Text" Href="@($"partners/{item.Partnership.Id}")">
-                            @L["Dashboard.WordsAction"]
-                        </MudButton>
-                        <MudButton Color="Color.Primary" Variant="Variant.Filled" Href="@($"partners/{item.Partnership.Id}/study")">
-                            @L["Dashboard.StudyAction"]
-                        </MudButton>
-                    </MudCardActions>
-                </MudCard>
-            </MudItem>
-        }
+    <div class="dashboard-hero">
+        <h1>@string.Format(L["Dashboard.Hello"].Value, _displayName) <span aria-hidden="true">👋</span></h1>
+        <div class="hero-subtitle">
+            @if (_stats?.DueCount > 0)
+            {
+                @string.Format(L["Dashboard.Subtitle.Due"].Value, _stats.DueCount)
+            }
+            else
+            {
+                @L["Dashboard.Subtitle.NoDue"]
+            }
+        </div>
+
+        <MudChip T="string"
+                 Color="Color.Default"
+                 Variant="Variant.Outlined"
+                 OnClick="OpenSwitcher"
+                 Class="partner-chip"
+                 Size="Size.Medium">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                <span class="fi fi-@_current.Partner.NativeLanguage.ToLower() partner-flag"></span>
+                <span>@_current.Partner.DisplayName</span>
+                <MudIcon Icon="@Icons.Material.Filled.SwapHoriz" Size="Size.Small" />
+                <span class="fi fi-@_userLanguage.ToLower() partner-flag"></span>
+                <span>@_displayName</span>
+                <MudIcon Icon="@Icons.Material.Filled.ArrowDropDown" Size="Size.Small" />
+            </MudStack>
+        </MudChip>
+    </div>
+
+    <MudGrid Spacing="3" Class="mt-2">
+        <MudItem xs="12" sm="6">
+            <div class="action-card action-card-study"
+                 @onclick="@(() => GoTo($"partners/{_current.Id}/study"))">
+                <div class="icon-circle icon-circle-lg icon-circle-primary">
+                    <MudIcon Icon="@Icons.Material.Filled.School" Style="font-size:1.75rem" />
+                </div>
+                <div class="action-card-body">
+                    <div class="action-card-title">@L["Dashboard.Action.Study"]</div>
+                    <div class="action-card-subtitle">
+                        @if (_stats?.DueCount > 0)
+                        {
+                            @string.Format(L["Dashboard.Action.Study.Subtitle.Some"].Value, _stats.DueCount)
+                        }
+                        else
+                        {
+                            @L["Dashboard.Action.Study.Subtitle.None"]
+                        }
+                    </div>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               EndIcon="@Icons.Material.Filled.ArrowForward"
+                               Size="Size.Small"
+                               Class="action-card-cta">
+                        @L["Dashboard.Action.Study.Cta"]
+                    </MudButton>
+                </div>
+            </div>
+        </MudItem>
+
+        <MudItem xs="12" sm="6">
+            <div class="action-card action-card-add"
+                 @onclick="@(() => GoTo($"partners/{_current.Id}/words/new"))">
+                <div class="icon-circle icon-circle-lg icon-circle-secondary">
+                    <MudIcon Icon="@Icons.Material.Filled.Add" Style="font-size:1.75rem" />
+                </div>
+                <div class="action-card-body">
+                    <div class="action-card-title">@L["Dashboard.Action.AddWord"]</div>
+                    <div class="action-card-subtitle">@L["Dashboard.Action.AddWord.Subtitle"]</div>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Secondary"
+                               Size="Size.Small"
+                               Class="action-card-cta">
+                        @L["Dashboard.Action.AddWord.Cta"]
+                    </MudButton>
+                </div>
+            </div>
+        </MudItem>
     </MudGrid>
+
+    @if (_stats is not null)
+    {
+        <MudGrid Spacing="3" Class="mt-1">
+            <MudItem xs="6" sm="3">
+                <StatTile Variant="streak"
+                          Icon="@Icons.Material.Filled.LocalFireDepartment"
+                          Label="@(L["Dashboard.Stat.Streak"].Value)"
+                          Value="@(_stats.Streak.ToString())"
+                          SubLabel="@(_stats.Streak > 0 ? L["Dashboard.Stat.Streak.Sub"].Value : L["Dashboard.Stat.Streak.Zero"].Value)" />
+            </MudItem>
+            <MudItem xs="6" sm="3">
+                <StatTile Variant="learned"
+                          Icon="@Icons.Material.Filled.Star"
+                          Label="@(L["Dashboard.Stat.Learned"].Value)"
+                          Value="@(_stats.LearnedCount.ToString())"
+                          SubLabel="@(L["Dashboard.Stat.Learned.Sub"].Value)" />
+            </MudItem>
+            <MudItem xs="6" sm="3">
+                <StatTile Variant="due"
+                          Icon="@Icons.Material.Filled.MenuBook"
+                          Label="@(L["Dashboard.Stat.Due"].Value)"
+                          Value="@(_stats.DueCount.ToString())"
+                          SubLabel="@(L["Dashboard.Stat.Due.Sub"].Value)" />
+            </MudItem>
+            <MudItem xs="6" sm="3">
+                <StatTile Variant="progress"
+                          Icon="@Icons.Material.Filled.TrendingUp"
+                          Label="@(L["Dashboard.Stat.Progress"].Value)"
+                          Value="@($"{ProgressPercent:0}%")"
+                          SubLabel="@(L["Dashboard.Stat.Progress.Sub"].Value)" />
+            </MudItem>
+        </MudGrid>
+
+        <div class="progress-card mt-4">
+            <div class="progress-card-header">
+                <div class="progress-card-title">@L["Dashboard.Progress.Title"]</div>
+                <div class="progress-card-counter">
+                    @string.Format(L["Dashboard.Progress.Done"].Value, _stats.TodayCount, _stats.DailyGoal)
+                    <span class="ml-1" aria-hidden="true">🏆</span>
+                </div>
+            </div>
+            <MudProgressLinear Value="@ProgressPercent"
+                               Color="Color.Tertiary"
+                               Rounded="true"
+                               Size="Size.Large" />
+            <div class="progress-card-sub">
+                @if (_stats.TodayCount >= _stats.DailyGoal)
+                {
+                    @L["Dashboard.Progress.Reached"]
+                }
+                else
+                {
+                    @string.Format(L["Dashboard.Progress.Remaining"].Value, _stats.DailyGoal - _stats.TodayCount)
+                }
+            </div>
+        </div>
+    }
 }
 
 @code {
     private bool _loading = true;
-    private List<DashboardItem> _active = new();
+    private string? _userId;
+    private string _displayName = "";
+    private string _userLanguage = "";
+    private PartnershipSummary? _current;
+    private DashboardStats? _stats;
+
+    private double ProgressPercent =>
+        _stats is null || _stats.DailyGoal <= 0
+            ? 0
+            : Math.Min(100, Math.Round(_stats.TodayCount * 100.0 / _stats.DailyGoal));
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var userId = UserManager.GetUserId(authState.User);
-        if (userId is null)
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        _userId = UserManager.GetUserId(auth.User);
+        if (_userId is null)
         {
             Nav.NavigateTo("Account/Login");
             return;
         }
+        await Load();
+    }
 
-        var partnerships = await PartnershipService.GetPartnershipsAsync(userId);
-        var active = partnerships.Where(p => p.Status == PartnershipStatus.Active).ToList();
-
-        var items = new List<DashboardItem>();
-        foreach (var p in active)
+    private async Task Load()
+    {
+        if (_userId is null) return;
+        var user = await UserManager.FindByIdAsync(_userId);
+        if (user is not null)
         {
-            var stats = await StudyService.GetStatsAsync(p.Id, userId);
-            items.Add(new DashboardItem(p, stats));
+            _displayName = user.DisplayName;
+            _userLanguage = user.NativeLanguage;
         }
 
-        _active = items;
+        _current = await PartnershipService.GetCurrentPartnershipAsync(_userId);
+        if (_current is not null)
+        {
+            var statsTask = Study.GetStatsAsync(_current.Id, _userId);
+            var streakTask = StreakService.GetCurrentStreakAsync(_userId);
+            var todayTask = Study.GetTodayReviewCountAsync(_userId);
+            await Task.WhenAll(statsTask, streakTask, todayTask);
+            _stats = new DashboardStats(
+                statsTask.Result.DueCount,
+                statsTask.Result.NewCount,
+                statsTask.Result.LearnedCount,
+                streakTask.Result,
+                todayTask.Result,
+                StudyBuddies.Core.Services.StudyService.DailyGoal);
+        }
         _loading = false;
     }
 
-    private record DashboardItem(PartnershipSummary Partnership, StudyStats Stats);
+    private async Task OpenSwitcher()
+    {
+        if (_current is null) return;
+        var parameters = new DialogParameters { ["CurrentPartnershipId"] = _current.Id };
+        var options = new DialogOptions { FullWidth = true, MaxWidth = MaxWidth.ExtraSmall };
+        var dialog = await DialogService.ShowAsync<PartnerSwitcher>(L["PartnerSwitcher.Title"].Value, parameters, options);
+        var result = await dialog.Result;
+        if (result is not null && !result.Canceled && result.Data is Guid)
+        {
+            await Load();
+            StateHasChanged();
+        }
+    }
+
+    private void GoTo(string url) => Nav.NavigateTo(url);
 }

@@ -5,6 +5,8 @@ namespace StudyBuddies.Core.Services;
 
 public class StudyService(ApplicationDbContext db) : IStudyService
 {
+    public const int DailyGoal = 10;
+
     public async Task<List<StudyCard>> GetDueCardsAsync(Guid partnershipId, string learnerUserId, int max = 20, int newPerDay = 10, CancellationToken ct = default)
     {
         await EnsureMemberAsync(partnershipId, learnerUserId, ct);
@@ -100,6 +102,17 @@ public class StudyService(ApplicationDbContext db) : IStudyService
             && w.Review.Repetitions >= 3, ct);
 
         return new StudyStats(due, fresh, learned);
+    }
+
+    public async Task<int> GetTodayReviewCountAsync(string learnerUserId, CancellationToken ct = default)
+    {
+        var todayUtc = DateTime.UtcNow.Date;
+        return await db.Reviews
+            .AsNoTracking()
+            .Where(r => r.Word.ForUserId == learnerUserId
+                && r.LastReview != null
+                && r.LastReview >= todayUtc)
+            .CountAsync(ct);
     }
 
     private async Task EnsureMemberAsync(Guid partnershipId, string userId, CancellationToken ct)

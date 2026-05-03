@@ -9,4 +9,6 @@ public interface IStudyService
     Task GradeAsync(Guid wordId, string learnerUserId, ReviewGrade grade, CancellationToken ct = default);
 
     Task<StudyStats> GetStatsAsync(Guid partnershipId, string learnerUserId, CancellationToken ct = default);
+
+    Task<int> GetTodayReviewCountAsync(string learnerUserId, CancellationToken ct = default);
 }

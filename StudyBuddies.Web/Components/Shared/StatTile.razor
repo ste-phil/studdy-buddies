@@ -1,0 +1,21 @@
+@* Reusable stat tile: icon-circle + label + big value + sub-label.
+   Variant controls the color theme via CSS class (streak/learned/due/progress). *@
+
+<div class="stat-tile stat-tile-@Variant">
+    <div class="icon-circle icon-circle-sm">
+        <MudIcon Icon="@Icon" Size="Size.Medium" />
+    </div>
+    <div class="stat-tile-body">
+        <div class="stat-tile-label">@Label</div>
+        <div class="stat-tile-value">@Value</div>
+        <div class="stat-tile-sub">@SubLabel</div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Icon { get; set; } = "";
+    [Parameter, EditorRequired] public string Label { get; set; } = "";
+    [Parameter, EditorRequired] public string Value { get; set; } = "";
+    [Parameter] public string SubLabel { get; set; } = "";
+    [Parameter, EditorRequired] public string Variant { get; set; } = "streak";
+}

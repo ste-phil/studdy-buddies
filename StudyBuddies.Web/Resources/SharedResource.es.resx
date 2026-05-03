@@ -59,11 +59,22 @@
   <data name="Auth.Login" xml:space="preserve"><value>Iniciar sesión</value></data>
   <data name="Auth.Logout" xml:space="preserve"><value>Cerrar sesión</value></data>
   <data name="Auth.Register" xml:space="preserve"><value>Registrarse</value></data>
+  <data name="Auth.LoginTitle" xml:space="preserve"><value>Bienvenido de nuevo</value></data>
+  <data name="Auth.LoginSubtitle" xml:space="preserve"><value>Inicia sesión y sigue aprendiendo con tu pareja.</value></data>
+  <data name="Auth.RegisterTitle" xml:space="preserve"><value>Crea tu cuenta</value></data>
+  <data name="Auth.RegisterSubtitle" xml:space="preserve"><value>Crea una cuenta y encuentra una pareja de estudio.</value></data>
+  <data name="Auth.Email" xml:space="preserve"><value>Correo</value></data>
+  <data name="Auth.Password" xml:space="preserve"><value>Contraseña</value></data>
+  <data name="Auth.ConfirmPassword" xml:space="preserve"><value>Confirmar contraseña</value></data>
+  <data name="Auth.RememberMe" xml:space="preserve"><value>Recuérdame</value></data>
+  <data name="Auth.ForgotPassword" xml:space="preserve"><value>¿Olvidaste tu contraseña?</value></data>
+  <data name="Auth.PasskeyLogin" xml:space="preserve"><value>Entrar con passkey</value></data>
+  <data name="Auth.NoAccountQuestion" xml:space="preserve"><value>¿Aún no tienes cuenta?</value></data>
+  <data name="Auth.HaveAccountQuestion" xml:space="preserve"><value>¿Ya tienes cuenta?</value></data>
+  <data name="Auth.Or" xml:space="preserve"><value>o</value></data>
 
-  <data name="Nav.Home" xml:space="preserve"><value>Inicio</value></data>
   <data name="Nav.Dashboard" xml:space="preserve"><value>Panel</value></data>
-  <data name="Nav.Partners" xml:space="preserve"><value>Parejas</value></data>
-  <data name="Nav.SearchPartners" xml:space="preserve"><value>Buscar pareja</value></data>
+  <data name="Nav.Partners" xml:space="preserve"><value>Gestionar parejas</value></data>
   <data name="Nav.Profile" xml:space="preserve"><value>Perfil</value></data>
 
   <data name="Common.Save" xml:space="preserve"><value>Guardar</value></data>
@@ -73,17 +84,47 @@
   <data name="Common.Back" xml:space="preserve"><value>Atrás</value></data>
   <data name="Common.Loading" xml:space="preserve"><value>Cargando …</value></data>
 
-  <data name="Home.Welcome" xml:space="preserve"><value>¡Bienvenido a StudyBuddies!</value></data>
-  <data name="Home.Description" xml:space="preserve"><value>Aprende vocabulario con una pareja. Cada uno introduce palabras en su idioma materno y la pareja las aprende como flashcards.</value></data>
-  <data name="Home.GoToDashboard" xml:space="preserve"><value>Ir al panel</value></data>
 
   <data name="Dashboard.Title" xml:space="preserve"><value>Panel</value></data>
-  <data name="Dashboard.NoPartners" xml:space="preserve"><value>Aún no tienes pareja activa. Busca una en "Buscar pareja".</value></data>
-  <data name="Dashboard.Due" xml:space="preserve"><value>Pendientes</value></data>
-  <data name="Dashboard.New" xml:space="preserve"><value>Nuevas</value></data>
-  <data name="Dashboard.Learned" xml:space="preserve"><value>Aprendidas</value></data>
-  <data name="Dashboard.WordsAction" xml:space="preserve"><value>Palabras</value></data>
-  <data name="Dashboard.StudyAction" xml:space="preserve"><value>Estudiar</value></data>
+  <data name="Dashboard.Hello" xml:space="preserve"><value>Hola {0}</value></data>
+  <data name="Dashboard.Subtitle.Due" xml:space="preserve"><value>Hoy {0} cartas para repasar</value></data>
+  <data name="Dashboard.Subtitle.NoDue" xml:space="preserve"><value>Hoy nada pendiente — ¡bien hecho!</value></data>
+  <data name="Dashboard.Action.Study" xml:space="preserve"><value>Estudiar</value></data>
+  <data name="Dashboard.Action.Study.Subtitle.Some" xml:space="preserve"><value>{0} pendientes</value></data>
+  <data name="Dashboard.Action.Study.Subtitle.None" xml:space="preserve"><value>Todo al día</value></data>
+  <data name="Dashboard.Action.Study.Cta" xml:space="preserve"><value>Continuar</value></data>
+  <data name="Dashboard.Action.AddWord" xml:space="preserve"><value>Añadir palabra</value></data>
+  <data name="Dashboard.Action.AddWord.Subtitle" xml:space="preserve"><value>Guardar palabra o frase nueva</value></data>
+  <data name="Dashboard.Action.AddWord.Cta" xml:space="preserve"><value>Añadir ahora</value></data>
+  <data name="Dashboard.Stat.Streak" xml:space="preserve"><value>Días seguidos</value></data>
+  <data name="Dashboard.Stat.Streak.Sub" xml:space="preserve"><value>¡Sigue así! 🔥</value></data>
+  <data name="Dashboard.Stat.Streak.Zero" xml:space="preserve"><value>¡Empieza tu racha!</value></data>
+  <data name="Dashboard.Stat.Learned" xml:space="preserve"><value>Palabras aprendidas</value></data>
+  <data name="Dashboard.Stat.Learned.Sub" xml:space="preserve"><value>Total</value></data>
+  <data name="Dashboard.Stat.Due" xml:space="preserve"><value>Cartas pendientes</value></data>
+  <data name="Dashboard.Stat.Due.Sub" xml:space="preserve"><value>Hoy</value></data>
+  <data name="Dashboard.Stat.Progress" xml:space="preserve"><value>Progreso</value></data>
+  <data name="Dashboard.Stat.Progress.Sub" xml:space="preserve"><value>Meta diaria</value></data>
+  <data name="Dashboard.Progress.Title" xml:space="preserve"><value>Tu progreso de hoy</value></data>
+  <data name="Dashboard.Progress.Done" xml:space="preserve"><value>{0} / {1} cartas hoy</value></data>
+  <data name="Dashboard.Progress.Remaining" xml:space="preserve"><value>¡Te faltan {0} cartas para tu meta diaria!</value></data>
+  <data name="Dashboard.Progress.Reached" xml:space="preserve"><value>¡Meta diaria alcanzada! 🎉</value></data>
+  <data name="Dashboard.Welcome.Title" xml:space="preserve"><value>¡Bienvenido a StudyBuddies!</value></data>
+  <data name="Dashboard.Welcome.Body" xml:space="preserve"><value>Primero necesitas una pareja de estudio. Encontraos y empezad.</value></data>
+  <data name="Dashboard.Welcome.FindPartner" xml:space="preserve"><value>Buscar pareja</value></data>
+  <data name="Welcome.HowItWorks.Title" xml:space="preserve"><value>Cómo funciona</value></data>
+  <data name="Welcome.HowItWorks.Step1.Title" xml:space="preserve"><value>Encuentra un partner</value></data>
+  <data name="Welcome.HowItWorks.Step1.Body" xml:space="preserve"><value>Conéctate con alguien que quiera aprender tu idioma.</value></data>
+  <data name="Welcome.HowItWorks.Step2.Title" xml:space="preserve"><value>Escribid palabras el uno para el otro</value></data>
+  <data name="Welcome.HowItWorks.Step2.Body" xml:space="preserve"><value>Tú añades vocabulario en tu idioma y tu partner lo aprende.</value></data>
+  <data name="Welcome.HowItWorks.Step3.Title" xml:space="preserve"><value>Aprende</value></data>
+  <data name="Welcome.HowItWorks.Step3.Body" xml:space="preserve"><value>Tarjetas con SM-2 — repite cada día solo lo necesario.</value></data>
+
+  <data name="PartnerSwitcher.Title" xml:space="preserve"><value>Cambiar de pareja</value></data>
+  <data name="PartnerSwitcher.Active" xml:space="preserve"><value>Otras parejas activas</value></data>
+  <data name="PartnerSwitcher.FindNew" xml:space="preserve"><value>Buscar nueva pareja</value></data>
+
+  <data name="IncomingBadge.Tooltip" xml:space="preserve"><value>{0} solicitud(es) pendientes</value></data>
 
   <data name="Partners.Title" xml:space="preserve"><value>Parejas</value></data>
   <data name="Partners.SearchButton" xml:space="preserve"><value>Buscar pareja</value></data>
@@ -139,6 +180,8 @@
   <data name="Study.Hard" xml:space="preserve"><value>Difícil</value></data>
   <data name="Study.Good" xml:space="preserve"><value>Bien</value></data>
   <data name="Study.Easy" xml:space="preserve"><value>Fácil</value></data>
+  <data name="Study.TapToFlip" xml:space="preserve"><value>Toca para voltear</value></data>
+  <data name="Study.FlipToGrade" xml:space="preserve"><value>Voltea primero la tarjeta para evaluar</value></data>
 
   <data name="Register.DisplayName" xml:space="preserve"><value>Nombre</value></data>
   <data name="Register.NativeLanguage" xml:space="preserve"><value>Idioma materno</value></data>

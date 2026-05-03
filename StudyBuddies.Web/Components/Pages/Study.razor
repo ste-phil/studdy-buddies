@@ -12,68 +12,102 @@
 
 <PageTitle>@L["Study.Title"]</PageTitle>
 
-<MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4">
-    <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Href="@($"partners/{PartnershipId}")" />
-    <MudText Typo="Typo.h5">@L["Study.Title"]</MudText>
-    <MudSpacer />
-    <MudText Typo="Typo.caption">@string.Format(L["Study.Remaining"].Value, _remaining)</MudText>
-</MudStack>
-
-@if (_loading)
-{
-    <MudProgressCircular Indeterminate="true" />
-}
-else if (_currentCard is null)
-{
-    <MudPaper Class="pa-8 text-center" Elevation="0" Outlined="true">
-        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Large" />
-        <MudText Typo="Typo.h5" Class="mt-4">@L["Study.NoCards"]</MudText>
-        <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="@($"partners/{PartnershipId}")" Class="mt-4">
-            @L["Study.GoBack"]
-        </MudButton>
-    </MudPaper>
-}
-else
-{
-    <MudPaper Class="pa-8 mb-4" Elevation="3" Style="min-height: 280px;">
-        <MudStack AlignItems="AlignItems.Center" Spacing="4">
-            <MudText Typo="Typo.caption" Color="Color.Tertiary">@_currentCard.TermLanguage.ToUpper()</MudText>
-            <MudText Typo="Typo.h3" Align="Align.Center">@_currentCard.Term</MudText>
-            <MudIconButton Icon="@Icons.Material.Filled.VolumeUp" OnClick="SpeakTerm" Color="Color.Primary" />
-
-            @if (_revealed)
+<div class="study-page">
+    <div class="study-container">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-3">
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" OnClick="GoBack" />
+            <MudText Typo="Typo.h5">@L["Study.Title"]</MudText>
+            <MudSpacer />
+            @if (!_loading && _total > 0)
             {
-                <MudDivider Class="my-2" Style="width:100%" />
-                <MudText Typo="Typo.caption" Color="Color.Tertiary">@_currentCard.TranslationLanguage.ToUpper()</MudText>
-                <MudText Typo="Typo.h4" Align="Align.Center">@_currentCard.Translation</MudText>
-                @if (!string.IsNullOrWhiteSpace(_currentCard.Example))
-                {
-                    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">@_currentCard.Example</MudAlert>
-                }
-                @if (!string.IsNullOrWhiteSpace(_currentCard.Notes))
-                {
-                    <MudText Typo="Typo.body2" Color="Color.Tertiary">@_currentCard.Notes</MudText>
-                }
+                <MudText Typo="Typo.body2" Color="Color.Tertiary">
+                    @_done / @_total (@($"{(int)Math.Round(_total == 0 ? 0 : (_done * 100.0 / _total))}%"))
+                </MudText>
             }
         </MudStack>
-    </MudPaper>
 
-    @if (!_revealed)
-    {
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" FullWidth="true" OnClick="() => _revealed = true">
-            @L["Study.ShowAnswer"]
-        </MudButton>
-    }
-    else
-    {
-        <MudGrid>
-            <MudItem xs="3"><MudButton Variant="Variant.Filled" Color="Color.Error" FullWidth="true" OnClick="() => Grade(ReviewGrade.Bad)">@L["Study.Bad"]</MudButton></MudItem>
-            <MudItem xs="3"><MudButton Variant="Variant.Filled" Color="Color.Warning" FullWidth="true" OnClick="() => Grade(ReviewGrade.Hard)">@L["Study.Hard"]</MudButton></MudItem>
-            <MudItem xs="3"><MudButton Variant="Variant.Filled" Color="Color.Success" FullWidth="true" OnClick="() => Grade(ReviewGrade.Good)">@L["Study.Good"]</MudButton></MudItem>
-            <MudItem xs="3"><MudButton Variant="Variant.Filled" Color="Color.Info" FullWidth="true" OnClick="() => Grade(ReviewGrade.Easy)">@L["Study.Easy"]</MudButton></MudItem>
-        </MudGrid>
-    }
-}
+        @if (!_loading && _total > 0)
+        {
+            <MudProgressLinear Color="Color.Primary"
+                               Value="@(_total == 0 ? 0 : (_done * 100.0 / _total))"
+                               Rounded="true"
+                               Size="Size.Medium"
+                               Class="mb-6" />
+        }
+
+        @if (_loading)
+        {
+            <div class="d-flex justify-center pa-12">
+                <MudProgressCircular Indeterminate="true" />
+            </div>
+        }
+        else if (_currentCard is null)
+        {
+            <MudPaper Class="pa-8 text-center" Elevation="0" Outlined="true">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Large" />
+                <MudText Typo="Typo.h5" Class="mt-4">@L["Study.NoCards"]</MudText>
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="GoBack" Class="mt-4">
+                    @L["Study.GoBack"]
+                </MudButton>
+            </MudPaper>
+        }
+        else
+        {
+            <FlipCard IsFlipped="_revealed" OnClick="HandleCardClick">
+                <FrontContent>
+                    <MudText Typo="Typo.caption" Color="Color.Tertiary">
+                        @_currentCard.TermLanguage.ToUpper()
+                    </MudText>
+                    <MudText Typo="Typo.h3" Align="Align.Center" Class="my-4">
+                        @_currentCard.Term
+                    </MudText>
+                    <div @onclick:stopPropagation="true">
+                        <MudIconButton Icon="@Icons.Material.Filled.VolumeUp"
+                                       OnClick="SpeakTerm"
+                                       Color="Color.Primary" />
+                    </div>
+                    <MudText Typo="Typo.caption" Color="Color.Tertiary" Class="mt-4">
+                        @L["Study.TapToFlip"]
+                    </MudText>
+                </FrontContent>
+                <BackContent>
+                    <MudText Typo="Typo.caption" Color="Color.Tertiary">
+                        @_currentCard.TranslationLanguage.ToUpper()
+                    </MudText>
+                    <MudText Typo="Typo.h4" Align="Align.Center" Class="my-3">
+                        @_currentCard.Translation
+                    </MudText>
+                    @if (!string.IsNullOrWhiteSpace(_currentCard.Example))
+                    {
+                        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-2">
+                            @_currentCard.Example
+                        </MudAlert>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(_currentCard.Notes))
+                    {
+                        <MudText Typo="Typo.body2" Color="Color.Tertiary" Class="mt-2">
+                            @_currentCard.Notes
+                        </MudText>
+                    }
+                </BackContent>
+            </FlipCard>
+
+            <div class="grade-buttons mt-6 @(_pulsing is not null ? "is-pulsing-" + _pulsing : "")">
+                <button class="grade-btn grade-bad"  disabled="@(!_revealed)" @onclick="@(() => Grade(ReviewGrade.Bad))">@L["Study.Bad"]</button>
+                <button class="grade-btn grade-hard" disabled="@(!_revealed)" @onclick="@(() => Grade(ReviewGrade.Hard))">@L["Study.Hard"]</button>
+                <button class="grade-btn grade-good" disabled="@(!_revealed)" @onclick="@(() => Grade(ReviewGrade.Good))">@L["Study.Good"]</button>
+                <button class="grade-btn grade-easy" disabled="@(!_revealed)" @onclick="@(() => Grade(ReviewGrade.Easy))">@L["Study.Easy"]</button>
+            </div>
+
+            @if (!_revealed)
+            {
+                <MudText Typo="Typo.caption" Align="Align.Center" Class="d-block mt-2" Color="Color.Tertiary">
+                    @L["Study.FlipToGrade"]
+                </MudText>
+            }
+        }
+    </div>
+</div>
 
 @code {
     [Parameter] public Guid PartnershipId { get; set; }
@@ -83,7 +117,9 @@ else
     private Queue<StudyCard> _queue = new();
     private StudyCard? _currentCard;
     private bool _revealed;
-    private int _remaining;
+    private int _total;
+    private int _done;
+    private string? _pulsing;
 
     protected override async Task OnInitializedAsync()
     {
@@ -93,7 +129,8 @@ else
 
         var cards = await StudyService.GetDueCardsAsync(PartnershipId, _userId);
         _queue = new Queue<StudyCard>(cards);
-        _remaining = _queue.Count;
+        _total = _queue.Count;
+        _done = 0;
         Next();
         _loading = false;
     }
@@ -102,20 +139,30 @@ else
     {
         _revealed = false;
         _currentCard = _queue.Count > 0 ? _queue.Dequeue() : null;
-        _remaining = _queue.Count + (_currentCard is null ? 0 : 1);
+    }
+
+    private void HandleCardClick()
+    {
+        if (!_revealed) _revealed = true;
     }
 
     private async Task Grade(ReviewGrade grade)
     {
-        if (_userId is null || _currentCard is null) return;
+        if (!_revealed || _userId is null || _currentCard is null) return;
+        _pulsing = grade.ToString().ToLowerInvariant();
+        StateHasChanged();
         try
         {
             await StudyService.GradeAsync(_currentCard.WordId, _userId, grade);
+            await Task.Delay(300);
+            _done++;
+            _pulsing = null;
             Next();
         }
         catch (Exception ex)
         {
             Snackbar.Add(ex.Message, Severity.Error);
+            _pulsing = null;
         }
     }
 
@@ -123,5 +170,10 @@ else
     {
         if (_currentCard is null) return;
         await JS.InvokeVoidAsync("studyBuddiesSpeech.speak", _currentCard.Term, _currentCard.TermLanguage);
+    }
+
+    private async Task GoBack()
+    {
+        await JS.InvokeVoidAsync("history.back");
     }
 }

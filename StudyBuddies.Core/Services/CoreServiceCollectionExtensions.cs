@@ -14,6 +14,7 @@ public static class CoreServiceCollectionExtensions
         services.AddScoped<IPartnershipService, PartnershipService>();
         services.AddScoped<IWordService, WordService>();
         services.AddScoped<IStudyService, StudyService>();
+        services.AddScoped<IStreakService, StreakService>();
 
         return services;
     }

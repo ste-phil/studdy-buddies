@@ -15,4 +15,10 @@ public interface IPartnershipService
     Task<List<PartnershipSummary>> GetPartnershipsAsync(string userId, CancellationToken ct = default);
 
     Task<PartnershipSummary?> GetPartnershipAsync(Guid partnershipId, string currentUserId, CancellationToken ct = default);
+
+    Task<PartnershipSummary?> GetCurrentPartnershipAsync(string userId, CancellationToken ct = default);
+
+    Task SetLastUsedPartnershipAsync(string userId, Guid partnershipId, CancellationToken ct = default);
+
+    Task<int> GetIncomingRequestCountAsync(string userId, CancellationToken ct = default);
 }

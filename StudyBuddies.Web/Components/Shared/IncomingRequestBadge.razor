@@ -1,0 +1,34 @@
+@inject IPartnershipService PartnershipService
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
+@inject IStringLocalizer<SharedResource> L
+
+@if (_count > 0)
+{
+    <MudTooltip Text="@string.Format(L["IncomingBadge.Tooltip"].Value, _count)">
+        <MudBadge Content="_count" Color="Color.Error" Overlap="true" Bordered="true" Class="mx-1">
+            <MudIconButton Icon="@Icons.Material.Filled.Notifications"
+                           Color="Color.Inherit"
+                           OnClick="OpenPartnersHub"
+                           aria-label="@string.Format(L["IncomingBadge.Tooltip"].Value, _count)" />
+        </MudBadge>
+    </MudTooltip>
+}
+
+@code {
+    private int _count;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userId = UserManager.GetUserId(auth.User);
+        if (userId is null)
+        {
+            return;
+        }
+        _count = await PartnershipService.GetIncomingRequestCountAsync(userId);
+    }
+
+    private void OpenPartnersHub() => Nav.NavigateTo("/partners");
+}

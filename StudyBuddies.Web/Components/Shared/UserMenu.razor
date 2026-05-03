@@ -1,0 +1,39 @@
+@inject IStringLocalizer<SharedResource> L
+@inject IJSRuntime JS
+
+<MudMenu Label="@DisplayName"
+         StartIcon="@Icons.Material.Filled.AccountCircle"
+         EndIcon="@Icons.Material.Filled.ArrowDropDown"
+         Variant="Variant.Text"
+         Color="Color.Inherit"
+         AnchorOrigin="Origin.BottomRight"
+         TransformOrigin="Origin.TopRight"
+         Dense="true">
+    <MudMenuItem Icon="@Icons.Material.Filled.Dashboard" Href="/dashboard">
+        @L["Nav.Dashboard"]
+    </MudMenuItem>
+    <MudMenuItem Icon="@Icons.Material.Filled.Group" Href="/partners">
+        @L["Nav.Partners"]
+    </MudMenuItem>
+    <MudMenuItem Icon="@Icons.Material.Filled.AccountCircle" Href="Account/Manage">
+        @L["Nav.Profile"]
+    </MudMenuItem>
+    <MudDivider />
+    <MudMenuItem Icon="@Icons.Material.Filled.Logout" OnClick="Logout">
+        @L["Auth.Logout"]
+    </MudMenuItem>
+</MudMenu>
+
+<form id="user-menu-logout-form" action="Account/Logout" method="post" style="display:none">
+    <AntiforgeryToken />
+    <input type="hidden" name="ReturnUrl" value="" />
+</form>
+
+@code {
+    [Parameter] public string DisplayName { get; set; } = "";
+
+    private async Task Logout()
+    {
+        await JS.InvokeVoidAsync("eval", "document.getElementById('user-menu-logout-form').submit()");
+    }
+}
