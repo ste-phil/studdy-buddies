@@ -1,5 +1,8 @@
 @inherits LayoutComponentBase
+@using Microsoft.Extensions.Options
+@using StudyBuddies.Web.Dev
 @inject Microsoft.Extensions.Localization.IStringLocalizer<StudyBuddies.Web.SharedResource> L
+@inject IOptions<DevOptions> DevOpts
 
 <MudThemeProvider Theme="@_theme" IsDarkMode="false" />
 <MudPopoverProvider />
@@ -16,6 +19,10 @@
         </MudLink>
         <MudSpacer />
         <LanguageSwitcher />
+        @if (DevOpts.Value.Enabled)
+        {
+            <DevUserSwitcher />
+        }
         <AuthorizeView>
             <Authorized>
                 <IncomingRequestBadge />

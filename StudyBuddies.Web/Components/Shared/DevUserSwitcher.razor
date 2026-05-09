@@ -1,0 +1,58 @@
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.Extensions.Options
+@using StudyBuddies.Web.Dev
+@inject IOptions<DevOptions> DevOpts
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthState
+
+@if (_visible)
+{
+    <MudMenu Icon="@Icons.Material.Filled.BugReport"
+             Color="Color.Inherit"
+             AnchorOrigin="Origin.BottomRight"
+             TransformOrigin="Origin.TopRight"
+             Dense="true"
+             Class="ml-2"
+             Label="@_label">
+        @foreach (var u in _users)
+        {
+            var isCurrent = u.Id == _currentUserId;
+            <MudMenuItem Href="@($"/dev/switch?userId={u.Id}")"
+                         ForceLoad="true"
+                         Icon="@(isCurrent ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.PersonOutline)">
+                @u.DisplayName <MudText Typo="Typo.caption" Color="Color.Default">(@u.NativeLanguage)</MudText>
+            </MudMenuItem>
+        }
+        <MudDivider />
+        <MudMenuItem Href="/dev/logout"
+                     ForceLoad="true"
+                     Icon="@Icons.Material.Filled.Logout">
+            Sign out (dev)
+        </MudMenuItem>
+    </MudMenu>
+}
+
+@code {
+    private bool _visible;
+    private string _label = "Dev";
+    private string? _currentUserId;
+    private List<ApplicationUser> _users = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!DevOpts.Value.Enabled)
+        {
+            return;
+        }
+
+        var state = await AuthState.GetAuthenticationStateAsync();
+        _currentUserId = UserManager.GetUserId(state.User);
+        _users = UserManager.Users
+            .OrderBy(u => u.DisplayName)
+            .ToList();
+
+        var current = _users.FirstOrDefault(u => u.Id == _currentUserId);
+        _label = current is not null ? $"Dev: {current.DisplayName}" : "Dev";
+        _visible = true;
+    }
+}
