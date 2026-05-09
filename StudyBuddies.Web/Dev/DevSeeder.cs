@@ -8,21 +8,40 @@ internal static class DevSeeder
 {
     private const string Password = "Pa$$w0rd!";
 
-    private static readonly DevUser Melissa = new("melissa@dev.local", "Melissa", "de");
-    private static readonly DevUser Philipp = new("philipp@dev.local", "Philipp", "es");
+    private static readonly DevUser Melissa = new("melissa@dev.local", "Melissa", "es");
+    private static readonly DevUser Philipp = new("philipp@dev.local", "Philipp", "de");
+    private static readonly DevUser Hannah = new("hannah@dev.local", "Hannah", "de");
 
+    // Authored by Melissa (es) for Philipp (learning es) -- partnership Melissa <-> Philipp
     private static readonly (string Term, string Translation)[] WordsForPhilipp =
+    {
+        ("casa", "Haus"),
+        ("agua", "Wasser"),
+        ("amigo", "Freund")
+    };
+
+    // Authored by Philipp (de) for Melissa (learning de) -- partnership Melissa <-> Philipp
+    private static readonly (string Term, string Translation)[] WordsForMelissaFromPhilipp =
     {
         ("Hund", "perro"),
         ("Apfel", "manzana"),
         ("Buch", "libro")
     };
 
-    private static readonly (string Term, string Translation)[] WordsForMelissa =
+    // Authored by Hannah (de) for Melissa (learning de) -- partnership Melissa <-> Hannah
+    private static readonly (string Term, string Translation)[] WordsForMelissaFromHannah =
     {
-        ("casa", "Haus"),
-        ("agua", "Wasser"),
-        ("amigo", "Freund")
+        ("Katze", "gato"),
+        ("Brot", "pan"),
+        ("Sonne", "sol")
+    };
+
+    // Authored by Melissa (es) for Hannah (learning es) -- partnership Melissa <-> Hannah
+    private static readonly (string Term, string Translation)[] WordsForHannah =
+    {
+        ("verde", "grün"),
+        ("rojo", "rot"),
+        ("azul", "blau")
     };
 
     public static async Task SeedAsync(IServiceProvider services)
@@ -33,10 +52,15 @@ internal static class DevSeeder
 
         var melissa = await EnsureUserAsync(userManager, Melissa, logger);
         var philipp = await EnsureUserAsync(userManager, Philipp, logger);
+        var hannah = await EnsureUserAsync(userManager, Hannah, logger);
 
-        var partnership = await EnsurePartnershipAsync(db, philipp, melissa, logger);
-        await EnsureWordsAsync(db, partnership, byUser: melissa, forUser: philipp, WordsForPhilipp, logger);
-        await EnsureWordsAsync(db, partnership, byUser: philipp, forUser: melissa, WordsForMelissa, logger);
+        var philippMelissa = await EnsurePartnershipAsync(db, philipp, melissa, logger);
+        await EnsureWordsAsync(db, philippMelissa, byUser: melissa, forUser: philipp, WordsForPhilipp, logger);
+        await EnsureWordsAsync(db, philippMelissa, byUser: philipp, forUser: melissa, WordsForMelissaFromPhilipp, logger);
+
+        var melissaHannah = await EnsurePartnershipAsync(db, melissa, hannah, logger);
+        await EnsureWordsAsync(db, melissaHannah, byUser: hannah, forUser: melissa, WordsForMelissaFromHannah, logger);
+        await EnsureWordsAsync(db, melissaHannah, byUser: melissa, forUser: hannah, WordsForHannah, logger);
     }
 
     private static async Task<ApplicationUser> EnsureUserAsync(
@@ -47,6 +71,22 @@ internal static class DevSeeder
         var existing = await userManager.FindByEmailAsync(seed.Email);
         if (existing is not null)
         {
+            var changed = false;
+            if (existing.DisplayName != seed.DisplayName)
+            {
+                existing.DisplayName = seed.DisplayName;
+                changed = true;
+            }
+            if (existing.NativeLanguage != seed.NativeLanguage)
+            {
+                existing.NativeLanguage = seed.NativeLanguage;
+                changed = true;
+            }
+            if (changed)
+            {
+                await userManager.UpdateAsync(existing);
+                logger.LogInformation("DevSeeder updated user {Email} (DisplayName/NativeLanguage)", seed.Email);
+            }
             return existing;
         }
 

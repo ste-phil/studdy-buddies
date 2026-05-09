@@ -1,6 +1,7 @@
 @inject IPartnershipService PartnershipService
 @inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> UserManager
 @inject AuthenticationStateProvider AuthStateProvider
+@inject ISnackbar Snackbar
 @inject NavigationManager Nav
 @inject IStringLocalizer<SharedResource> L
 
@@ -15,10 +16,58 @@
         }
         else
         {
-            @if (_others.Count > 0)
+            @if (_incoming.Count > 0)
             {
-                <MudText Typo="Typo.subtitle2" Class="mb-2">@L["PartnerSwitcher.Active"]</MudText>
-                <MudList T="PartnershipSummary" Dense="true">
+                <MudText Typo="Typo.subtitle2" Class="mb-1">@L["Partners.IncomingRequests"]</MudText>
+                <MudList T="PartnershipSummary" Dense="true" Class="mb-3">
+                    @foreach (var p in _incoming)
+                    {
+                        <MudListItem T="PartnershipSummary">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="row-wrap-xs">
+                                <MudAvatar Color="Color.Secondary" Size="Size.Small">
+                                    @(p.Partner.DisplayName.FirstOrDefault())
+                                </MudAvatar>
+                                <div style="flex:1">
+                                    <MudText>@p.Partner.DisplayName</MudText>
+                                    <MudText Typo="Typo.caption">@p.Partner.NativeLanguage.ToUpper()</MudText>
+                                </div>
+                                <div class="actions-row">
+                                    <MudButton Size="Size.Small" Color="Color.Success" Variant="Variant.Filled" OnClick="() => Accept(p.Id)">@L["Partners.Accept"]</MudButton>
+                                    <MudButton Size="Size.Small" Color="Color.Error" Variant="Variant.Outlined" OnClick="() => Decline(p.Id)">@L["Partners.Decline"]</MudButton>
+                                </div>
+                            </MudStack>
+                        </MudListItem>
+                    }
+                </MudList>
+            }
+
+            @if (_outgoing.Count > 0)
+            {
+                <MudText Typo="Typo.subtitle2" Class="mb-1">@L["Partners.OutgoingRequests"]</MudText>
+                <MudList T="PartnershipSummary" Dense="true" Class="mb-3">
+                    @foreach (var p in _outgoing)
+                    {
+                        <MudListItem T="PartnershipSummary">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudAvatar Size="Size.Small">@(p.Partner.DisplayName.FirstOrDefault())</MudAvatar>
+                                <div style="flex:1">
+                                    <MudText>@p.Partner.DisplayName</MudText>
+                                    <MudText Typo="Typo.caption">@p.Partner.NativeLanguage.ToUpper() • @L["Partners.Waiting"]</MudText>
+                                </div>
+                            </MudStack>
+                        </MudListItem>
+                    }
+                </MudList>
+            }
+
+            <MudText Typo="Typo.subtitle2" Class="mb-1">@L["PartnerSwitcher.Active"]</MudText>
+            @if (_others.Count == 0)
+            {
+                <MudText Color="Color.Tertiary" Typo="Typo.caption" Class="mb-3">@L["Partners.NoActive"]</MudText>
+            }
+            else
+            {
+                <MudList T="PartnershipSummary" Dense="true" Class="mb-3">
                     @foreach (var p in _others)
                     {
                         <MudListItem T="PartnershipSummary" OnClick="@(() => Switch(p.Id))">
@@ -30,12 +79,13 @@
                                     <MudText>@p.Partner.DisplayName</MudText>
                                     <MudText Typo="Typo.caption">@p.Partner.NativeLanguage.ToUpper()</MudText>
                                 </div>
+                                <MudIcon Icon="@Icons.Material.Filled.ChevronRight" Size="Size.Small" />
                             </MudStack>
                         </MudListItem>
                     }
                 </MudList>
-                <MudDivider Class="my-2" />
             }
+
             <MudButton Variant="Variant.Filled"
                        Color="Color.Primary"
                        StartIcon="@Icons.Material.Filled.PersonSearch"
@@ -50,11 +100,13 @@
 @code {
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
 
-    [Parameter] public Guid CurrentPartnershipId { get; set; }
+    [Parameter] public Guid? CurrentPartnershipId { get; set; }
 
     private bool _loading = true;
-    private List<PartnershipSummary> _others = new();
     private string? _userId;
+    private List<PartnershipSummary> _incoming = new();
+    private List<PartnershipSummary> _outgoing = new();
+    private List<PartnershipSummary> _others = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -65,11 +117,50 @@
             _loading = false;
             return;
         }
+        await Reload();
+    }
+
+    private async Task Reload()
+    {
+        if (_userId is null) return;
+        _loading = true;
         var all = await PartnershipService.GetPartnershipsAsync(_userId);
+        _incoming = all.Where(p => p.Status == PartnershipStatus.Pending && p.IsIncomingRequest).ToList();
+        _outgoing = all.Where(p => p.Status == PartnershipStatus.Pending && !p.IsIncomingRequest).ToList();
         _others = all
             .Where(p => p.Status == PartnershipStatus.Active && p.Id != CurrentPartnershipId)
             .ToList();
         _loading = false;
+    }
+
+    private async Task Accept(Guid partnershipId)
+    {
+        if (_userId is null) return;
+        try
+        {
+            await PartnershipService.AcceptPartnershipAsync(partnershipId, _userId);
+            Snackbar.Add(L["Partners.Accepted"].Value, Severity.Success);
+            await Reload();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private async Task Decline(Guid partnershipId)
+    {
+        if (_userId is null) return;
+        try
+        {
+            await PartnershipService.DeclinePartnershipAsync(partnershipId, _userId);
+            Snackbar.Add(L["Partners.DeclinedToast"].Value, Severity.Info);
+            await Reload();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
     }
 
     private async Task Switch(Guid partnershipId)

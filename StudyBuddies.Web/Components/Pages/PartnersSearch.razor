@@ -91,7 +91,7 @@ else if (_results is { Count: > 0 })
         {
             await PartnershipService.RequestPartnershipAsync(_userId, toUserId);
             Snackbar.Add(L["Search.RequestSent"].Value, Severity.Success);
-            Nav.NavigateTo("partners");
+            Nav.NavigateTo("dashboard");
         }
         catch (Exception ex)
         {

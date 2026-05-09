@@ -19,20 +19,30 @@ internal static class DevAutoLoginMiddleware
                 return;
             }
 
-            if (ctx.Request.Query.ContainsKey("nologin"))
+            if (ctx.Request.Query.TryGetValue("nologin", out var noLoginValue))
             {
-                ctx.Response.Cookies.Append(SkipCookie, "1", new CookieOptions
-                {
-                    HttpOnly = true,
-                    SameSite = SameSiteMode.Lax,
-                    IsEssential = true,
-                    MaxAge = TimeSpan.FromHours(8)
-                });
-                await next();
-                return;
-            }
+                var raw = noLoginValue.ToString();
+                var disableSkip = raw == "0" || raw.Equals("false", StringComparison.OrdinalIgnoreCase);
 
-            if (ctx.Request.Cookies.ContainsKey(SkipCookie))
+                if (disableSkip)
+                {
+                    ctx.Response.Cookies.Delete(SkipCookie);
+                    // fall through to auto-login below so the user is signed in immediately
+                }
+                else
+                {
+                    ctx.Response.Cookies.Append(SkipCookie, "1", new CookieOptions
+                    {
+                        HttpOnly = true,
+                        SameSite = SameSiteMode.Lax,
+                        IsEssential = true,
+                        MaxAge = TimeSpan.FromHours(8)
+                    });
+                    await next();
+                    return;
+                }
+            }
+            else if (ctx.Request.Cookies.ContainsKey(SkipCookie))
             {
                 await next();
                 return;

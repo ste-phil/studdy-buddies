@@ -1,21 +1,17 @@
 @inject IStringLocalizer<SharedResource> L
 @inject IJSRuntime JS
+@inject Microsoft.AspNetCore.Identity.UserManager<StudyBuddies.Core.Data.ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthState
 
-<MudMenu Label="@DisplayName"
+<MudMenu Label="@_displayName"
          StartIcon="@Icons.Material.Filled.AccountCircle"
          EndIcon="@Icons.Material.Filled.ArrowDropDown"
          Variant="Variant.Text"
          Color="Color.Inherit"
+         Style="text-transform:none;"
          AnchorOrigin="Origin.BottomRight"
          TransformOrigin="Origin.TopRight"
          Dense="true">
-    <MudMenuItem Icon="@Icons.Material.Filled.Dashboard" Href="/dashboard">
-        @L["Nav.Dashboard"]
-    </MudMenuItem>
-    <MudMenuItem Icon="@Icons.Material.Filled.Group" Href="/partners">
-        @L["Nav.Partners"]
-    </MudMenuItem>
-    <MudDivider />
     <MudMenuItem Icon="@Icons.Material.Filled.Logout" OnClick="Logout">
         @L["Auth.Logout"]
     </MudMenuItem>
@@ -27,7 +23,19 @@
 </form>
 
 @code {
-    [Parameter] public string DisplayName { get; set; } = "";
+    private string _displayName = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthState.GetAuthenticationStateAsync();
+        if (state.User.Identity?.IsAuthenticated == true)
+        {
+            var user = await UserManager.GetUserAsync(state.User);
+            _displayName = !string.IsNullOrWhiteSpace(user?.DisplayName)
+                ? user!.DisplayName
+                : (state.User.Identity.Name ?? "");
+        }
+    }
 
     private async Task Logout()
     {

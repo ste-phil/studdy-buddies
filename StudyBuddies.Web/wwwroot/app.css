@@ -105,6 +105,34 @@ h1:focus {
 
 .partner-chip {
     font-weight: 500;
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+}
+
+/* Action button rows that stack to full-width column on phones */
+.actions-row {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+    .actions-row {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        flex-basis: 100%;
+    }
+    .actions-row .mud-button { width: 100%; }
+
+    /* Parents marked row-wrap-xs allow their children (incl. .actions-row) to wrap to a new line */
+    .row-wrap-xs { flex-wrap: wrap; }
+}
+
+/* Table cells hidden on small screens (used in WordsTable for Tags + Status) */
+@media (max-width: 600px) {
+    .mud-table .hide-on-mobile { display: none !important; }
 }
 
 /* ===== Dashboard ===== */

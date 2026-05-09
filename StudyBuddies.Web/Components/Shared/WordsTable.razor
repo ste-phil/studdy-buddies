@@ -5,8 +5,8 @@
     <HeaderContent>
         <MudTh>@L["Status.Headers.Word"]</MudTh>
         <MudTh>@L["Status.Headers.Translation"]</MudTh>
-        <MudTh>@L["Status.Headers.Tags"]</MudTh>
-        <MudTh>@L["Status.Headers.Status"]</MudTh>
+        <MudTh Class="hide-on-mobile">@L["Status.Headers.Tags"]</MudTh>
+        <MudTh Class="hide-on-mobile">@L["Status.Headers.Status"]</MudTh>
         <MudTh></MudTh>
     </HeaderContent>
     <RowTemplate>
@@ -18,13 +18,13 @@
             @context.Translation
             <MudText Typo="Typo.caption" Color="Color.Tertiary">@context.TranslationLanguage.ToUpper()</MudText>
         </MudTd>
-        <MudTd>
+        <MudTd Class="hide-on-mobile">
             @foreach (var tag in context.Tags)
             {
                 <MudChip T="string" Size="Size.Small" Color="Color.Default">@tag</MudChip>
             }
         </MudTd>
-        <MudTd>
+        <MudTd Class="hide-on-mobile">
             @if (context.DueDate is null)
             {
                 <MudChip T="string" Size="Size.Small" Color="Color.Info">@L["Status.New"]</MudChip>

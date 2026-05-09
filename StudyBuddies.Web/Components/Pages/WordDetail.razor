@@ -31,14 +31,14 @@ else
 
         @if (_word.IsAuthoredByMe)
         {
-            <MudStack Row="true">
+            <div class="actions-row">
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Save" Disabled="@_saving">
                     @L["Common.Save"]
                 </MudButton>
                 <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="Delete">
                     @L["Common.Delete"]
                 </MudButton>
-            </MudStack>
+            </div>
         }
         else
         {

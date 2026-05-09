@@ -28,7 +28,7 @@
         <AuthorizeView>
             <Authorized>
                 <IncomingRequestBadge />
-                <UserMenu DisplayName="@(context.User.Identity?.Name ?? string.Empty)" />
+                <UserMenu />
             </Authorized>
             <NotAuthorized>
                 <MudButton Href="Account/Login" Variant="Variant.Text" Color="Color.Inherit">@L["Auth.Login"]</MudButton>

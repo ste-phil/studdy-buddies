@@ -1,7 +1,7 @@
 @inject IPartnershipService PartnershipService
 @inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> UserManager
 @inject AuthenticationStateProvider AuthStateProvider
-@inject NavigationManager Nav
+@inject IDialogService DialogService
 @inject IStringLocalizer<SharedResource> L
 
 @if (_count > 0)
@@ -10,7 +10,7 @@
         <MudBadge Content="_count" Color="Color.Error" Overlap="true" Bordered="true" Class="mx-1">
             <MudIconButton Icon="@Icons.Material.Filled.Notifications"
                            Color="Color.Inherit"
-                           OnClick="OpenPartnersHub"
+                           OnClick="OpenSwitcher"
                            aria-label="@string.Format(L["IncomingBadge.Tooltip"].Value, _count)" />
         </MudBadge>
     </MudTooltip>
@@ -18,17 +18,28 @@
 
 @code {
     private int _count;
+    private string? _userId;
 
     protected override async Task OnInitializedAsync()
     {
         var auth = await AuthStateProvider.GetAuthenticationStateAsync();
-        var userId = UserManager.GetUserId(auth.User);
-        if (userId is null)
+        _userId = UserManager.GetUserId(auth.User);
+        if (_userId is null)
         {
             return;
         }
-        _count = await PartnershipService.GetIncomingRequestCountAsync(userId);
+        _count = await PartnershipService.GetIncomingRequestCountAsync(_userId);
     }
 
-    private void OpenPartnersHub() => Nav.NavigateTo("/partners");
+    private async Task OpenSwitcher()
+    {
+        var options = new DialogOptions { FullWidth = true, MaxWidth = MaxWidth.Small };
+        var dialog = await DialogService.ShowAsync<PartnerSwitcher>(L["PartnerSwitcher.Title"].Value, new DialogParameters(), options);
+        await dialog.Result;
+        if (_userId is not null)
+        {
+            _count = await PartnershipService.GetIncomingRequestCountAsync(_userId);
+            StateHasChanged();
+        }
+    }
 }
