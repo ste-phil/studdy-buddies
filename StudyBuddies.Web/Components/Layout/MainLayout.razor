@@ -3,8 +3,9 @@
 @using StudyBuddies.Web.Dev
 @inject Microsoft.Extensions.Localization.IStringLocalizer<StudyBuddies.Web.SharedResource> L
 @inject IOptions<DevOptions> DevOpts
+@inject IJSRuntime JS
 
-<MudThemeProvider Theme="@_theme" IsDarkMode="false" />
+<MudThemeProvider Theme="@_theme" @bind-IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -19,6 +20,7 @@
         </MudLink>
         <MudSpacer />
         <LanguageSwitcher />
+        <DarkModeSwitcher IsDark="_isDarkMode" IsDarkChanged="OnThemeChanged" />
         @if (DevOpts.Value.Enabled)
         {
             <DevUserSwitcher />
@@ -49,6 +51,47 @@
 </div>
 
 @code {
+    private bool _isDarkMode;
+
+    [CascadingParameter] private HttpContext? HttpContext { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (HttpContext?.Request.Cookies.TryGetValue("theme", out var saved) == true)
+        {
+            _isDarkMode = saved == "dark";
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        try
+        {
+            var saved = await JS.InvokeAsync<string?>("studyBuddiesTheme.get");
+            var dark = saved == "dark";
+            if (dark != _isDarkMode)
+            {
+                _isDarkMode = dark;
+                StateHasChanged();
+            }
+        }
+        catch (InvalidOperationException)
+        {
+            // JS interop not available during static SSR; OnInitialized handled the cookie read.
+        }
+    }
+
+    private Task OnThemeChanged(bool isDark)
+    {
+        _isDarkMode = isDark;
+        return Task.CompletedTask;
+    }
+
     private readonly MudTheme _theme = new()
     {
         PaletteLight = new PaletteLight
@@ -65,6 +108,25 @@
             Surface = "#FFFFFF",
             DrawerBackground = "#FFFFFF",
             LinesDefault = "#E5E7EB"
+        },
+        PaletteDark = new PaletteDark
+        {
+            Primary = "#818CF8",
+            Secondary = "#F472B6",
+            Tertiary = "#A78BFA",
+            Success = "#34D399",
+            Warning = "#FBBF24",
+            Info = "#60A5FA",
+            AppbarBackground = "#1E1B4B",
+            AppbarText = "#FFFFFF",
+            Background = "#0F172A",
+            Surface = "#1E293B",
+            DrawerBackground = "#1E293B",
+            LinesDefault = "#374151",
+            TextPrimary = "#F1F5F9",
+            TextSecondary = "#CBD5E1",
+            DrawerText = "#F1F5F9",
+            ActionDefault = "#CBD5E1"
         },
         Typography = new Typography
         {

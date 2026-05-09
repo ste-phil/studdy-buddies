@@ -1,0 +1,22 @@
+@inject IJSRuntime JS
+@inject Microsoft.Extensions.Localization.IStringLocalizer<StudyBuddies.Web.SharedResource> L
+
+<MudIconButton Icon="@(IsDark ? Icons.Material.Filled.LightMode : Icons.Material.Outlined.DarkMode)"
+               Color="Color.Inherit"
+               OnClick="HandleClick"
+               Size="Size.Medium"
+               aria-label="@L["Theme.Toggle"]"
+               title="@(IsDark ? L["Theme.SwitchToLight"] : L["Theme.SwitchToDark"])"
+               Class="ml-1" />
+
+@code {
+    [Parameter] public bool IsDark { get; set; }
+    [Parameter] public EventCallback<bool> IsDarkChanged { get; set; }
+
+    private async Task HandleClick()
+    {
+        var next = !IsDark;
+        await JS.InvokeVoidAsync("studyBuddiesTheme.set", next ? "dark" : "light");
+        await IsDarkChanged.InvokeAsync(next);
+    }
+}

@@ -56,6 +56,10 @@
   <data name="Lang.German" xml:space="preserve"><value>Alemán</value></data>
   <data name="Lang.Spanish" xml:space="preserve"><value>Español</value></data>
 
+  <data name="Theme.Toggle" xml:space="preserve"><value>Cambiar tema</value></data>
+  <data name="Theme.SwitchToDark" xml:space="preserve"><value>Activar tema oscuro</value></data>
+  <data name="Theme.SwitchToLight" xml:space="preserve"><value>Activar tema claro</value></data>
+
   <data name="Auth.Login" xml:space="preserve"><value>Iniciar sesión</value></data>
   <data name="Auth.Logout" xml:space="preserve"><value>Cerrar sesión</value></data>
   <data name="Auth.Register" xml:space="preserve"><value>Registrarse</value></data>
