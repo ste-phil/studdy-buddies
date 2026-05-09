@@ -1,0 +1,20 @@
+services:
+  studybuddies:
+    # Pull the published image. Override IMAGE in .env or environment to
+    # point at your registry, e.g. registry.gitlab.com/<group>/<project>.
+    image: ${IMAGE:-studybuddies:latest}
+    # Or build locally instead of pulling:
+    # build: .
+    container_name: studybuddies
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-8080}:8080"
+    volumes:
+      - studybuddies-data:/data
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      # The image already sets ConnectionStrings__DefaultConnection to
+      # /data/app.db. Override here only if you want a different path.
+
+volumes:
+  studybuddies-data:

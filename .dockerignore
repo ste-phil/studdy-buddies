@@ -1,0 +1,37 @@
+# VCS
+.git
+.gitignore
+.github
+.gitlab-ci.yml
+
+# IDE / editor
+.vs
+.vscode
+.idea
+*.user
+*.suo
+
+# Build output
+**/bin
+**/obj
+**/out
+**/publish
+
+# Runtime / local data
+**/app.db
+**/app.db-shm
+**/app.db-wal
+**/*.log
+
+# Tooling caches
+.claude
+.playwright-mcp
+.nuget
+
+# Project meta that shouldn't go into the image
+CLAUDE.md
+README.md
+docker-compose.yml
+docker-compose.*.yml
+Dockerfile
+.dockerignore
