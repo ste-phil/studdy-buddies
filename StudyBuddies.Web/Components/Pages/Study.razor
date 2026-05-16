@@ -75,6 +75,10 @@
         if (_userId is null) return;
 
         var cards = await StudyService.GetDueCardsAsync(PartnershipId, _userId);
+        if (cards.Count == 0)
+        {
+            cards = await StudyService.GetExtraPracticeCardsAsync(PartnershipId, _userId);
+        }
         _queue = new Queue<StudyCard>(cards);
         _total = _queue.Count;
         _done = 0;

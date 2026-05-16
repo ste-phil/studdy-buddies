@@ -1,10 +1,20 @@
 @inject IStringLocalizer<SharedResource> L
+@inject IJSRuntime JS
+@implements IAsyncDisposable
 
 <div class="grade-buttons mt-6 @(Pulsing is not null ? "is-pulsing-" + Pulsing : "")">
-    <button class="grade-btn grade-bad  @HighlightClass(ReviewGrade.Bad)"  disabled="@Disabled" @onclick="@(() => Click(ReviewGrade.Bad))">@L["Study.Bad"]</button>
-    <button class="grade-btn grade-hard @HighlightClass(ReviewGrade.Hard)" disabled="@Disabled" @onclick="@(() => Click(ReviewGrade.Hard))">@L["Study.Hard"]</button>
-    <button class="grade-btn grade-good @HighlightClass(ReviewGrade.Good)" disabled="@Disabled" @onclick="@(() => Click(ReviewGrade.Good))">@L["Study.Good"]</button>
-    <button class="grade-btn grade-easy @HighlightClass(ReviewGrade.Easy)" disabled="@Disabled" @onclick="@(() => Click(ReviewGrade.Easy))">@L["Study.Easy"]</button>
+    <button class="grade-btn grade-bad"  disabled="@Disabled" @onclick="@(() => Click(ReviewGrade.Bad))">
+        <kbd class="grade-key">1</kbd> @L["Study.Bad"]
+    </button>
+    <button class="grade-btn grade-hard" disabled="@Disabled" @onclick="@(() => Click(ReviewGrade.Hard))">
+        <kbd class="grade-key">2</kbd> @L["Study.Hard"]
+    </button>
+    <button class="grade-btn grade-good" disabled="@Disabled" @onclick="@(() => Click(ReviewGrade.Good))">
+        <kbd class="grade-key">3</kbd> @L["Study.Good"]
+    </button>
+    <button class="grade-btn grade-easy" disabled="@Disabled" @onclick="@(() => Click(ReviewGrade.Easy))">
+        <kbd class="grade-key">4</kbd> @L["Study.Easy"]
+    </button>
 </div>
 
 @code {
@@ -13,8 +23,33 @@
     [Parameter] public string? Pulsing { get; set; }
     [Parameter] public EventCallback<ReviewGrade> OnGrade { get; set; }
 
-    private string HighlightClass(ReviewGrade g) =>
-        Highlight == g ? "is-suggested" : "";
+    private DotNetObjectReference<GradeButtons>? _ref;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _ref = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("studyBuddiesHotkeys.register", _ref);
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnHotkey(int grade)
+    {
+        if (Disabled) return;
+        await OnGrade.InvokeAsync((ReviewGrade)grade);
+    }
 
     private Task Click(ReviewGrade g) => OnGrade.InvokeAsync(g);
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("studyBuddiesHotkeys.unregister");
+        }
+        catch { }
+        _ref?.Dispose();
+    }
 }

@@ -5,26 +5,12 @@
     <MudText Typo="Typo.caption" Color="Color.Tertiary">
         @Card.TermLanguage.ToUpper()
     </MudText>
-
-    @if (HideTerm && !_revealed)
-    {
-        <MudStack Row="true" Justify="Justify.Center" AlignItems="AlignItems.Center" Class="my-4">
-            <MudIconButton Icon="@Icons.Material.Filled.VolumeUp"
-                           Size="Size.Large"
-                           Color="Color.Primary"
-                           OnClick="SpeakTerm" />
-            <MudText Typo="Typo.h6" Color="Color.Tertiary">@L["Study.Listening.PlayAgain"]</MudText>
-        </MudStack>
-    }
-    else
-    {
-        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center" Class="my-4">
-            <MudText Typo="Typo.h3" Align="Align.Center">@Card.Term</MudText>
-            <MudIconButton Icon="@Icons.Material.Filled.VolumeUp"
-                           OnClick="SpeakTerm"
-                           Color="Color.Primary" />
-        </MudStack>
-    }
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center" Class="my-4">
+        <MudText Typo="Typo.h3" Align="Align.Center">@Card.Term</MudText>
+        <MudIconButton Icon="@Icons.Material.Filled.VolumeUp"
+                       OnClick="SpeakTerm"
+                       Color="Color.Primary" />
+    </MudStack>
 
     <MudTextField @ref="_input"
                   @bind-Value="_answer"
@@ -73,9 +59,6 @@
 @code {
     [Parameter, EditorRequired] public StudyCard Card { get; set; } = null!;
     [Parameter, EditorRequired] public EventCallback<StudyAttemptInput> OnAttempt { get; set; }
-    [Parameter] public bool HideTerm { get; set; }
-    [Parameter] public bool AutoSpeak { get; set; }
-    [Parameter] public StudyMode Mode { get; set; } = StudyMode.Type;
 
     private MudTextField<string>? _input;
     private string _answer = "";
@@ -86,16 +69,9 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (firstRender && _input is not null)
         {
-            if (AutoSpeak)
-            {
-                await SpeakTerm();
-            }
-            if (_input is not null)
-            {
-                await _input.FocusAsync();
-            }
+            await _input.FocusAsync();
         }
     }
 
@@ -134,7 +110,7 @@
         await Task.Delay(250);
         await OnAttempt.InvokeAsync(new StudyAttemptInput(
             Card.WordId,
-            Mode,
+            StudyMode.Type,
             grade,
             grade >= ReviewGrade.Hard,
             _answer,

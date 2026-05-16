@@ -33,6 +33,31 @@ window.studyBuddiesTheme = {
     }
 };
 
+window.studyBuddiesHotkeys = {
+    _handler: null,
+    register: function (dotNetRef) {
+        this.unregister();
+        this._handler = (e) => {
+            const ae = document.activeElement;
+            const tag = (ae && ae.tagName ? ae.tagName : '').toLowerCase();
+            if (tag === 'input' || tag === 'textarea' || (ae && ae.isContentEditable)) return;
+            if (e.ctrlKey || e.altKey || e.metaKey) return;
+            const map = { '1': 1, '2': 3, '3': 4, '4': 5 };
+            if (e.key in map) {
+                e.preventDefault();
+                dotNetRef.invokeMethodAsync('OnHotkey', map[e.key]);
+            }
+        };
+        document.addEventListener('keydown', this._handler);
+    },
+    unregister: function () {
+        if (this._handler) {
+            document.removeEventListener('keydown', this._handler);
+            this._handler = null;
+        }
+    }
+};
+
 window.studyBuddiesSpeech = {
     speak: function (text, lang) {
         if (!('speechSynthesis' in window)) {

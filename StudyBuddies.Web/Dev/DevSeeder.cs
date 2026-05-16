@@ -17,7 +17,10 @@ internal static class DevSeeder
     {
         ("casa", "Haus"),
         ("agua", "Wasser"),
-        ("amigo", "Freund")
+        ("amigo", "Freund"),
+        ("coche", "Auto"),
+        ("playa", "Strand"),
+        ("mesa", "Tisch")
     };
 
     // Authored by Philipp (de) for Melissa (learning de) -- partnership Melissa <-> Philipp
@@ -25,7 +28,10 @@ internal static class DevSeeder
     {
         ("Hund", "perro"),
         ("Apfel", "manzana"),
-        ("Buch", "libro")
+        ("Buch", "libro"),
+        ("Stuhl", "silla"),
+        ("Tag", "día"),
+        ("Nacht", "noche")
     };
 
     // Authored by Hannah (de) for Melissa (learning de) -- partnership Melissa <-> Hannah
@@ -33,7 +39,9 @@ internal static class DevSeeder
     {
         ("Katze", "gato"),
         ("Brot", "pan"),
-        ("Sonne", "sol")
+        ("Sonne", "sol"),
+        ("Kind", "niño"),
+        ("Frau", "mujer")
     };
 
     // Authored by Melissa (es) for Hannah (learning es) -- partnership Melissa <-> Hannah
@@ -41,7 +49,9 @@ internal static class DevSeeder
     {
         ("verde", "grün"),
         ("rojo", "rot"),
-        ("azul", "blau")
+        ("azul", "blau"),
+        ("amarillo", "gelb"),
+        ("negro", "schwarz")
     };
 
     public static async Task SeedAsync(IServiceProvider services)
