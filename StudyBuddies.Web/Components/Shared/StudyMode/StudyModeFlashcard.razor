@@ -1,7 +1,7 @@
 @inject IJSRuntime JS
 @inject IStringLocalizer<SharedResource> L
 
-<FlipCard IsFlipped="_revealed" OnClick="HandleClick">
+<FlipCard IsFlipped="_revealed" OnClick="HandleClick" ExtraClass="@(_wiggling ? "is-wiggling" : null)">
     <FrontContent>
         <MudText Typo="Typo.caption" Color="Color.Tertiary">
             @Card.TermLanguage.ToUpper()
@@ -55,6 +55,7 @@
 
     private bool _revealed;
     private string? _pulsing;
+    private bool _wiggling;
 
     private void HandleClick()
     {
@@ -70,8 +71,20 @@
     {
         if (!_revealed) return;
         _pulsing = grade.ToString().ToLowerInvariant();
+
+        if (grade >= ReviewGrade.Good)
+        {
+            try { await JS.InvokeVoidAsync("studyBuddiesConfetti.burst", grade == ReviewGrade.Easy ? 52 : 36); }
+            catch { /* JS interop may be unavailable during prerender */ }
+        }
+        else if (grade == ReviewGrade.Bad)
+        {
+            _wiggling = true;
+        }
+
         StateHasChanged();
-        await Task.Delay(250);
+        await Task.Delay(grade == ReviewGrade.Bad ? 520 : 280);
+        _wiggling = false;
         await OnAttempt.InvokeAsync(new StudyAttemptInput(
             Card.WordId,
             StudyMode.Flashcard,

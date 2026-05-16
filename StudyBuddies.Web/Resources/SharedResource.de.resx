@@ -91,6 +91,8 @@
 
   <data name="Dashboard.Title" xml:space="preserve"><value>Dashboard</value></data>
   <data name="Dashboard.Hello" xml:space="preserve"><value>Hallo {0}</value></data>
+  <data name="CoupleHub.DaysTogether" xml:space="preserve"><value>Tage zusammen ❤️</value></data>
+  <data name="CoupleHub.JustStarted" xml:space="preserve"><value>Frisch verbunden — los geht's! 💕</value></data>
   <data name="Dashboard.Subtitle.Due" xml:space="preserve"><value>Heute {0} Karten fällig zum Lernen</value></data>
   <data name="Dashboard.Subtitle.NoDue" xml:space="preserve"><value>Heute keine Karten fällig — gut gemacht!</value></data>
   <data name="Dashboard.Action.Study" xml:space="preserve"><value>Lernen</value></data>

@@ -1,0 +1,48 @@
+@inject IStringLocalizer<SharedResource> L
+
+<div class="couple-hub">
+    <span class="couple-deco couple-deco-1" aria-hidden="true">✨</span>
+    <span class="couple-deco couple-deco-2" aria-hidden="true">💕</span>
+    <span class="couple-deco couple-deco-3" aria-hidden="true">🌸</span>
+    <span class="couple-deco couple-deco-4" aria-hidden="true">✨</span>
+
+    <div class="couple-hub-row">
+        <div class="couple-avatar" title="@MyDisplayName">
+            @InitialOf(MyDisplayName)
+            <span class="couple-flag fi fi-@MyLanguage.ToLower()"></span>
+        </div>
+        <div class="couple-heart" aria-hidden="true">❤️</div>
+        <div class="couple-avatar" title="@Partnership.Partner.DisplayName">
+            @InitialOf(Partnership.Partner.DisplayName)
+            <span class="couple-flag fi fi-@Partnership.Partner.NativeLanguage.ToLower()"></span>
+        </div>
+    </div>
+    <div class="couple-meta">
+        @if (DaysTogether <= 0)
+        {
+            @L["CoupleHub.JustStarted"]
+        }
+        else
+        {
+            <span class="couple-days">@DaysTogether</span> @L["CoupleHub.DaysTogether"]
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public PartnershipSummary Partnership { get; set; } = null!;
+    [Parameter, EditorRequired] public string MyDisplayName { get; set; } = "";
+    [Parameter, EditorRequired] public string MyLanguage { get; set; } = "";
+
+    private int DaysTogether
+    {
+        get
+        {
+            var anchor = Partnership.AcceptedAt ?? Partnership.CreatedAt;
+            return (int)Math.Floor((DateTime.UtcNow - anchor).TotalDays);
+        }
+    }
+
+    private static string InitialOf(string name)
+        => string.IsNullOrWhiteSpace(name) ? "?" : char.ToUpperInvariant(name.Trim()[0]).ToString();
+}

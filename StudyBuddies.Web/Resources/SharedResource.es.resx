@@ -91,6 +91,8 @@
 
   <data name="Dashboard.Title" xml:space="preserve"><value>Panel</value></data>
   <data name="Dashboard.Hello" xml:space="preserve"><value>Hola {0}</value></data>
+  <data name="CoupleHub.DaysTogether" xml:space="preserve"><value>días juntos ❤️</value></data>
+  <data name="CoupleHub.JustStarted" xml:space="preserve"><value>Recién conectados — ¡a por ello! 💕</value></data>
   <data name="Dashboard.Subtitle.Due" xml:space="preserve"><value>Hoy {0} cartas para repasar</value></data>
   <data name="Dashboard.Subtitle.NoDue" xml:space="preserve"><value>Hoy nada pendiente — ¡bien hecho!</value></data>
   <data name="Dashboard.Action.Study" xml:space="preserve"><value>Estudiar</value></data>

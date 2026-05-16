@@ -1,4 +1,4 @@
-<div class="flip-card @(IsFlipped ? "is-flipped" : "")" @onclick="OnClick">
+<div class="flip-card @(IsFlipped ? "is-flipped" : "") @ExtraClass" @onclick="OnClick">
     <div class="flip-card-inner">
         <div class="flip-card-front">
             @FrontContent
@@ -14,4 +14,5 @@
     [Parameter] public RenderFragment? FrontContent { get; set; }
     [Parameter] public RenderFragment? BackContent { get; set; }
     [Parameter] public EventCallback OnClick { get; set; }
+    [Parameter] public string? ExtraClass { get; set; }
 }

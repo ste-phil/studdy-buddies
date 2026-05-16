@@ -33,6 +33,45 @@ window.studyBuddiesTheme = {
     }
 };
 
+window.studyBuddiesConfetti = {
+    burst: function (count) {
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            return;
+        }
+        const n = count || 36;
+        const layer = document.createElement('div');
+        layer.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;';
+        document.body.appendChild(layer);
+        const palette = ['#F08A7E', '#B6A4E8', '#7FD1B0', '#F5C26B', '#F4A496', '#C8B8F0'];
+        const emojis = ['❤️', '✨', '💖', '🌸', '⭐'];
+        for (let i = 0; i < n; i++) {
+            const useEmoji = Math.random() < 0.25;
+            const p = document.createElement('span');
+            const startX = 50 + (Math.random() - 0.5) * 30;
+            const angle = (Math.random() - 0.5) * 140;
+            const distance = 40 + Math.random() * 40;
+            const rot = (Math.random() - 0.5) * 720;
+            const dur = 900 + Math.random() * 700;
+            if (useEmoji) {
+                p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                p.style.cssText = 'position:absolute;left:' + startX + 'vw;top:50vh;font-size:' + (16 + Math.random() * 16) + 'px;will-change:transform,opacity;';
+            } else {
+                const size = 6 + Math.random() * 8;
+                p.style.cssText = 'position:absolute;left:' + startX + 'vw;top:50vh;width:' + size + 'px;height:' + (size * 0.4) + 'px;background:' + palette[Math.floor(Math.random() * palette.length)] + ';border-radius:2px;will-change:transform,opacity;';
+            }
+            layer.appendChild(p);
+            p.animate(
+                [
+                    { transform: 'translate(-50%, -50%) rotate(0deg)', opacity: 1 },
+                    { transform: 'translate(' + angle + 'vw, ' + distance + 'vh) rotate(' + rot + 'deg)', opacity: 0 }
+                ],
+                { duration: dur, easing: 'cubic-bezier(0.2, 0.7, 0.4, 1)', fill: 'forwards' }
+            );
+        }
+        setTimeout(function () { layer.remove(); }, 1800);
+    }
+};
+
 window.studyBuddiesSpeech = {
     speak: function (text, lang) {
         if (!('speechSynthesis' in window)) {
