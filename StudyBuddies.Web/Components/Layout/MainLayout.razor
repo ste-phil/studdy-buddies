@@ -11,7 +11,7 @@
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="1" Dense="true">
+    <MudAppBar Elevation="0" Dense="true" Class="sb-appbar">
         <MudLink Href="/" Color="Color.Inherit" Underline="Underline.None">
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
                 <MudIcon Icon="@Icons.Material.Filled.School" Color="Color.Inherit" />
@@ -31,8 +31,8 @@
                 <UserMenu />
             </Authorized>
             <NotAuthorized>
-                <MudButton Href="Account/Login" Variant="Variant.Text" Color="Color.Inherit">@L["Auth.Login"]</MudButton>
-                <MudButton Href="Account/Register" Variant="Variant.Outlined" Color="Color.Inherit" Class="ml-2">@L["Auth.Register"]</MudButton>
+                <MudButton Href="Account/Login" Variant="Variant.Text" Color="Color.Inherit" Class="sb-btn">@L["Auth.Login"]</MudButton>
+                <MudButton Href="Account/Register" Variant="Variant.Outlined" Color="Color.Primary" Class="sb-btn ml-2">@L["Auth.Register"]</MudButton>
             </NotAuthorized>
         </AuthorizeView>
     </MudAppBar>
@@ -96,48 +96,50 @@
     {
         PaletteLight = new PaletteLight
         {
-            Primary = "#6366F1",
-            Secondary = "#EC4899",
-            Tertiary = "#8B5CF6",
-            Success = "#10B981",
-            Warning = "#F59E0B",
-            Info = "#3B82F6",
-            AppbarBackground = "#6366F1",
-            AppbarText = "#FFFFFF",
-            Background = "#F8FAFC",
+            Primary = "#F08A7E",
+            Secondary = "#B6A4E8",
+            Tertiary = "#7FD1B0",
+            Success = "#6FC9A1",
+            Warning = "#F5C26B",
+            Info = "#7BB6E8",
+            AppbarBackground = "#FFF6F0",
+            AppbarText = "#3A2E3F",
+            Background = "#FFF6F0",
             Surface = "#FFFFFF",
             DrawerBackground = "#FFFFFF",
-            LinesDefault = "#E5E7EB"
+            TextPrimary = "#3A2E3F",
+            TextSecondary = "#7A6B7D",
+            LinesDefault = "#EFE3E8"
         },
         PaletteDark = new PaletteDark
         {
-            Primary = "#818CF8",
-            Secondary = "#F472B6",
-            Tertiary = "#A78BFA",
-            Success = "#34D399",
-            Warning = "#FBBF24",
-            Info = "#60A5FA",
-            AppbarBackground = "#1E1B4B",
-            AppbarText = "#FFFFFF",
-            Background = "#0F172A",
-            Surface = "#1E293B",
-            DrawerBackground = "#1E293B",
-            LinesDefault = "#374151",
-            TextPrimary = "#F1F5F9",
-            TextSecondary = "#CBD5E1",
-            DrawerText = "#F1F5F9",
-            ActionDefault = "#CBD5E1"
+            Primary = "#F4A496",
+            Secondary = "#C8B8F0",
+            Tertiary = "#8FDDBF",
+            Success = "#82D6B0",
+            Warning = "#F8CF82",
+            Info = "#95C6F0",
+            AppbarBackground = "#26212E",
+            AppbarText = "#F2E9EF",
+            Background = "#1F1822",
+            Surface = "#26212E",
+            DrawerBackground = "#26212E",
+            LinesDefault = "#3A2F40",
+            TextPrimary = "#F2E9EF",
+            TextSecondary = "#B8A9BD",
+            DrawerText = "#F2E9EF",
+            ActionDefault = "#B8A9BD"
         },
         Typography = new Typography
         {
             Default = new DefaultTypography
             {
-                FontFamily = new[] { "Inter", "Helvetica Neue", "Helvetica", "Arial", "sans-serif" }
+                FontFamily = new[] { "Nunito", "system-ui", "-apple-system", "Segoe UI", "sans-serif" }
             }
         },
         LayoutProperties = new LayoutProperties
         {
-            DefaultBorderRadius = "10px"
+            DefaultBorderRadius = "14px"
         }
     };
 }
