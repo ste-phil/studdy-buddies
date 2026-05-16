@@ -112,8 +112,25 @@
     {
         if (!_revealed) return;
         _pulsing = grade.ToString().ToLowerInvariant();
+        try
+        {
+            if (grade >= ReviewGrade.Good)
+            {
+                await JS.InvokeVoidAsync("studyBuddiesConfetti.burst", grade == ReviewGrade.Easy ? 52 : 36);
+                await JS.InvokeVoidAsync("studyBuddiesSound.success");
+            }
+            else if (grade == ReviewGrade.Bad)
+            {
+                await JS.InvokeVoidAsync("studyBuddiesSound.error");
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("studyBuddiesSound.pop");
+            }
+        }
+        catch { /* ignore prerender */ }
         StateHasChanged();
-        await Task.Delay(250);
+        await Task.Delay(280);
         await OnAttempt.InvokeAsync(new StudyAttemptInput(
             Card.WordId,
             StudyMode.Cloze,

@@ -83,6 +83,19 @@
         _picked = option;
         _isCorrect = option == Card.Translation;
         var grade = _isCorrect ? ReviewGrade.Good : ReviewGrade.Bad;
+        try
+        {
+            if (_isCorrect)
+            {
+                await JS.InvokeVoidAsync("studyBuddiesConfetti.burst", 36);
+                await JS.InvokeVoidAsync("studyBuddiesSound.success");
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("studyBuddiesSound.error");
+            }
+        }
+        catch { /* ignore prerender */ }
         StateHasChanged();
         await Task.Delay(700);
         await OnAttempt.InvokeAsync(new StudyAttemptInput(
