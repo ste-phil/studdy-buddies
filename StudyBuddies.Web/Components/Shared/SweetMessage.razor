@@ -1,0 +1,35 @@
+@inject IStringLocalizer<SharedResource> L
+
+<div class="sweet-message" role="status" aria-live="polite">
+    <span class="sweet-message-emoji" aria-hidden="true">@_emoji</span>
+    <span class="sweet-message-text">@_text</span>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string PartnerName { get; set; } = "";
+
+    private static readonly (string Key, string Emoji)[] Pool =
+    {
+        ("Sweet.Thinking",     "💭"),
+        ("Sweet.GoodTeam",     "💪"),
+        ("Sweet.GoodDay",      "🌸"),
+        ("Sweet.LookingFwd",   "❤️"),
+        ("Sweet.GettingBetter","✨"),
+        ("Sweet.BreatheAndGo", "🌿"),
+        ("Sweet.Magic",        "🪄"),
+        ("Sweet.SmallSteps",   "🌱"),
+        ("Sweet.YouGotThis",   "🚀"),
+        ("Sweet.Together",     "🤝"),
+    };
+
+    private string _text = "";
+    private string _emoji = "";
+
+    protected override void OnParametersSet()
+    {
+        var idx = (DateTime.UtcNow.DayOfYear + (PartnerName?.GetHashCode() ?? 0)) & int.MaxValue;
+        var pick = Pool[idx % Pool.Length];
+        _emoji = pick.Emoji;
+        _text = string.Format(L[pick.Key].Value, PartnerName ?? "");
+    }
+}

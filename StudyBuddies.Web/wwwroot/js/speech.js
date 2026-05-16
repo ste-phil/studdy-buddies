@@ -33,6 +33,54 @@ window.studyBuddiesTheme = {
     }
 };
 
+window.studyBuddiesSound = (function () {
+    let ctx = null;
+    const isEnabled = () => /(?:^|; )sbsound=on(?:;|$)/.test(document.cookie);
+    const ensureCtx = () => {
+        if (!isEnabled()) return null;
+        if (!('AudioContext' in window || 'webkitAudioContext' in window)) return null;
+        if (!ctx) {
+            try { ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+            catch (e) { return null; }
+        }
+        if (ctx.state === 'suspended') { try { ctx.resume(); } catch (e) { } }
+        return ctx;
+    };
+    const tone = (freqs, dur, type, gainPeak) => {
+        const ac = ensureCtx();
+        if (!ac) return;
+        const now = ac.currentTime;
+        const segments = Array.isArray(freqs) ? freqs : [freqs];
+        const segDur = dur / segments.length;
+        const osc = ac.createOscillator();
+        const gain = ac.createGain();
+        osc.type = type || 'sine';
+        osc.frequency.setValueAtTime(segments[0], now);
+        for (let i = 1; i < segments.length; i++) {
+            osc.frequency.linearRampToValueAtTime(segments[i], now + segDur * i);
+        }
+        const peak = gainPeak != null ? gainPeak : 0.18;
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(peak, now + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+        osc.connect(gain).connect(ac.destination);
+        osc.start(now);
+        osc.stop(now + dur + 0.02);
+    };
+    return {
+        get: function () { return isEnabled() ? 'on' : 'off'; },
+        set: function (state) {
+            const val = state === 'on' ? 'on' : 'off';
+            document.cookie = 'sbsound=' + val + '; path=/; max-age=31536000; samesite=lax';
+            if (val === 'on') { ensureCtx(); }
+        },
+        pop:     function () { tone(820, 0.08, 'sine', 0.16); },
+        flip:    function () { tone([520, 720], 0.10, 'triangle', 0.14); },
+        success: function () { tone([523, 659, 784], 0.28, 'sine', 0.18); },
+        error:   function () { tone([320, 200], 0.18, 'sine', 0.16); }
+    };
+})();
+
 window.studyBuddiesConfetti = {
     burst: function (count) {
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {

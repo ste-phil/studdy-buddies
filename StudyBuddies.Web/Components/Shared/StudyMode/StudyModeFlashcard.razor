@@ -57,9 +57,12 @@
     private string? _pulsing;
     private bool _wiggling;
 
-    private void HandleClick()
+    private async Task HandleClick()
     {
-        if (!_revealed) _revealed = true;
+        if (_revealed) return;
+        _revealed = true;
+        try { await JS.InvokeVoidAsync("studyBuddiesSound.flip"); }
+        catch { /* ignore prerender / sound disabled */ }
     }
 
     private async Task SpeakTerm()
@@ -74,12 +77,23 @@
 
         if (grade >= ReviewGrade.Good)
         {
-            try { await JS.InvokeVoidAsync("studyBuddiesConfetti.burst", grade == ReviewGrade.Easy ? 52 : 36); }
+            try
+            {
+                await JS.InvokeVoidAsync("studyBuddiesConfetti.burst", grade == ReviewGrade.Easy ? 52 : 36);
+                await JS.InvokeVoidAsync("studyBuddiesSound.success");
+            }
             catch { /* JS interop may be unavailable during prerender */ }
         }
         else if (grade == ReviewGrade.Bad)
         {
             _wiggling = true;
+            try { await JS.InvokeVoidAsync("studyBuddiesSound.error"); }
+            catch { /* ignore */ }
+        }
+        else
+        {
+            try { await JS.InvokeVoidAsync("studyBuddiesSound.pop"); }
+            catch { /* ignore */ }
         }
 
         StateHasChanged();

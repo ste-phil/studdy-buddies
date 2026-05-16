@@ -428,6 +428,78 @@ h1:focus {
     .couple-deco { animation: none; }
 }
 
+/* ===== Sweet message banner (Phase 3) ===== */
+.sweet-message {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+    padding: 0.45rem 0.95rem;
+    border-radius: var(--sb-radius-pill);
+    background:
+        linear-gradient(135deg, rgba(var(--sb-color-primary-rgb), 0.14) 0%, rgba(var(--sb-color-secondary-rgb), 0.14) 100%);
+    border: 1px solid rgba(var(--sb-color-primary-rgb), 0.20);
+    color: var(--sb-text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    animation: sb-bounce-in var(--sb-motion-slow) var(--sb-ease-bounce) both;
+    animation-delay: 100ms;
+}
+
+.sweet-message-emoji {
+    font-size: 1.1rem;
+    line-height: 1;
+    display: inline-flex;
+    animation: sb-float 3.4s var(--sb-ease-soft) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sweet-message,
+    .sweet-message-emoji { animation: none; }
+}
+
+/* ===== Daily goal celebration (Phase 3) ===== */
+.progress-card.is-goal-reached {
+    background:
+        linear-gradient(135deg, rgba(var(--sb-color-tertiary-rgb), 0.18) 0%, rgba(var(--sb-color-primary-rgb), 0.14) 100%);
+    border-color: rgba(var(--sb-color-tertiary-rgb), 0.42);
+    box-shadow: 0 0 0 3px rgba(var(--sb-color-tertiary-rgb), 0.18), var(--sb-shadow-soft);
+}
+
+.progress-card-celebrate {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.6rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--sb-radius-pill);
+    background: var(--sb-color-tertiary);
+    color: #15201D;
+    font-size: 0.85rem;
+    font-weight: 800;
+    animation: sb-pop var(--sb-motion-base) var(--sb-ease-bounce);
+}
+
+/* Streak glow when streak >= 3 */
+.stat-tile.is-on-fire {
+    border-color: rgba(var(--sb-color-primary-rgb), 0.45);
+    animation: streak-fire-glow 2.2s var(--sb-ease-soft) infinite;
+}
+
+@keyframes streak-fire-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--sb-color-primary-rgb), 0.0); }
+    50%      { box-shadow: 0 0 22px 2px rgba(var(--sb-color-primary-rgb), 0.32); }
+}
+
+.stat-tile.is-on-fire .icon-circle {
+    animation: sb-wiggle 1.4s var(--sb-ease-soft) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .stat-tile.is-on-fire,
+    .stat-tile.is-on-fire .icon-circle { animation: none; }
+}
+
 /* Action cards (Lernen / Wort hinzufügen) */
 .action-card {
     border-radius: var(--sb-radius-md);

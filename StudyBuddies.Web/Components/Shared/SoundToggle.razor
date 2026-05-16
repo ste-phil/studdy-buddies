@@ -1,0 +1,44 @@
+@inject IJSRuntime JS
+@inject Microsoft.Extensions.Localization.IStringLocalizer<StudyBuddies.Web.SharedResource> L
+
+<MudIconButton Icon="@(_isOn ? Icons.Material.Filled.VolumeUp : Icons.Material.Outlined.VolumeOff)"
+               Color="Color.Inherit"
+               OnClick="Toggle"
+               Size="Size.Medium"
+               aria-label="@(_isOn ? L["Sound.Off"] : L["Sound.On"])"
+               title="@(_isOn ? L["Sound.Off"] : L["Sound.On"])"
+               Class="ml-1" />
+
+@code {
+    private bool _isOn;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        try
+        {
+            var saved = await JS.InvokeAsync<string?>("studyBuddiesSound.get");
+            var on = saved == "on";
+            if (on != _isOn)
+            {
+                _isOn = on;
+                StateHasChanged();
+            }
+        }
+        catch (InvalidOperationException)
+        {
+            // JS interop not available during static SSR
+        }
+    }
+
+    private async Task Toggle()
+    {
+        _isOn = !_isOn;
+        await JS.InvokeVoidAsync("studyBuddiesSound.set", _isOn ? "on" : "off");
+        if (_isOn)
+        {
+            try { await JS.InvokeVoidAsync("studyBuddiesSound.pop"); }
+            catch { /* ignore */ }
+        }
+    }
+}

@@ -93,6 +93,19 @@
   <data name="Dashboard.Hello" xml:space="preserve"><value>Hallo {0}</value></data>
   <data name="CoupleHub.DaysTogether" xml:space="preserve"><value>Tage zusammen ❤️</value></data>
   <data name="CoupleHub.JustStarted" xml:space="preserve"><value>Frisch verbunden — los geht's! 💕</value></data>
+  <data name="Sweet.Thinking" xml:space="preserve"><value>{0} denkt grad an dich</value></data>
+  <data name="Sweet.GoodTeam" xml:space="preserve"><value>Ihr seid ein gutes Team</value></data>
+  <data name="Sweet.GoodDay" xml:space="preserve"><value>Heute ist ein guter Tag fürs Lernen</value></data>
+  <data name="Sweet.LookingFwd" xml:space="preserve"><value>{0} freut sich auf dich</value></data>
+  <data name="Sweet.GettingBetter" xml:space="preserve"><value>Du wirst immer besser</value></data>
+  <data name="Sweet.BreatheAndGo" xml:space="preserve"><value>Atme tief durch und los!</value></data>
+  <data name="Sweet.Magic" xml:space="preserve"><value>Ihr zwei seid magisch</value></data>
+  <data name="Sweet.SmallSteps" xml:space="preserve"><value>Klein anfangen, groß werden</value></data>
+  <data name="Sweet.YouGotThis" xml:space="preserve"><value>Du schaffst das!</value></data>
+  <data name="Sweet.Together" xml:space="preserve"><value>Zusammen lernt es sich leichter</value></data>
+  <data name="Dashboard.Progress.ReachedCelebration" xml:space="preserve"><value>Tagesziel erreicht — fantastisch!</value></data>
+  <data name="Sound.On" xml:space="preserve"><value>Töne aktivieren</value></data>
+  <data name="Sound.Off" xml:space="preserve"><value>Töne deaktivieren</value></data>
   <data name="Dashboard.Subtitle.Due" xml:space="preserve"><value>Heute {0} Karten fällig zum Lernen</value></data>
   <data name="Dashboard.Subtitle.NoDue" xml:space="preserve"><value>Heute keine Karten fällig — gut gemacht!</value></data>
   <data name="Dashboard.Action.Study" xml:space="preserve"><value>Lernen</value></data>

@@ -10,6 +10,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Nav
 @inject IDialogService DialogService
+@inject IJSRuntime JS
 @inject IStringLocalizer<SharedResource> L
 
 <PageTitle>@L["Dashboard.Title"]</PageTitle>
@@ -57,6 +58,8 @@ else
     </div>
 
     <CoupleHub Partnership="_current" MyDisplayName="@_displayName" MyLanguage="@_userLanguage" />
+
+    <SweetMessage PartnerName="@_current.Partner.DisplayName" />
 
     <MudGrid Spacing="3" Class="mt-2">
         <MudItem xs="12" sm="4">
@@ -116,7 +119,8 @@ else
                           Icon="@Icons.Material.Filled.LocalFireDepartment"
                           Label="@(L["Dashboard.Stat.Streak"].Value)"
                           Value="@(_stats.Streak.ToString())"
-                          SubLabel="@(_stats.Streak > 0 ? L["Dashboard.Stat.Streak.Sub"].Value : L["Dashboard.Stat.Streak.Zero"].Value)" />
+                          SubLabel="@(_stats.Streak > 0 ? L["Dashboard.Stat.Streak.Sub"].Value : L["Dashboard.Stat.Streak.Zero"].Value)"
+                          Glow="@(_stats.Streak >= 3)" />
             </MudItem>
             <MudItem xs="6" sm="3">
                 <StatTile Variant="learned"
@@ -141,7 +145,7 @@ else
             </MudItem>
         </MudGrid>
 
-        <div class="progress-card mt-4">
+        <div class="progress-card mt-4 @(GoalReached ? "is-goal-reached" : "")">
             <div class="progress-card-header">
                 <div class="progress-card-title">@L["Dashboard.Progress.Title"]</div>
                 <div class="progress-card-counter">
@@ -153,16 +157,19 @@ else
                                Color="Color.Tertiary"
                                Rounded="true"
                                Size="Size.Large" />
-            <div class="progress-card-sub">
-                @if (_stats.TodayCount >= _stats.DailyGoal)
-                {
-                    @L["Dashboard.Progress.Reached"]
-                }
-                else
-                {
+            @if (GoalReached)
+            {
+                <div class="progress-card-celebrate">
+                    <span aria-hidden="true">🎉</span>
+                    <span>@L["Dashboard.Progress.ReachedCelebration"]</span>
+                </div>
+            }
+            else
+            {
+                <div class="progress-card-sub">
                     @string.Format(L["Dashboard.Progress.Remaining"].Value, _stats.DailyGoal - _stats.TodayCount)
-                }
-            </div>
+                </div>
+            }
         </div>
 
         @if (_accuracy is { Total: > 0 })
@@ -199,6 +206,19 @@ else
         _stats is null || _stats.DailyGoal <= 0
             ? 0
             : Math.Min(100, Math.Round(_stats.TodayCount * 100.0 / _stats.DailyGoal));
+
+    private bool GoalReached =>
+        _stats is not null && _stats.DailyGoal > 0 && _stats.TodayCount >= _stats.DailyGoal;
+
+    private bool _celebratedOnce;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || !GoalReached || _celebratedOnce) return;
+        _celebratedOnce = true;
+        try { await JS.InvokeVoidAsync("studyBuddiesConfetti.burst", 48); }
+        catch { /* ignore prerender / JS unavailable */ }
+    }
 
     protected override async Task OnInitializedAsync()
     {
