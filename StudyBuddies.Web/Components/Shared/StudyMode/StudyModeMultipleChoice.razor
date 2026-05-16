@@ -1,0 +1,96 @@
+@inject IJSRuntime JS
+@inject IStringLocalizer<SharedResource> L
+
+<MudPaper Class="study-input-card pa-6" Elevation="0" Outlined="true">
+    <MudText Typo="Typo.caption" Color="Color.Tertiary">
+        @Card.TermLanguage.ToUpper()
+    </MudText>
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center" Class="my-4">
+        <MudText Typo="Typo.h3" Align="Align.Center">@Card.Term</MudText>
+        <MudIconButton Icon="@Icons.Material.Filled.VolumeUp"
+                       OnClick="SpeakTerm"
+                       Color="Color.Primary" />
+    </MudStack>
+    <MudText Typo="Typo.body2" Align="Align.Center" Color="Color.Tertiary" Class="mb-3">
+        @L["Study.MCQ.Choose"]
+    </MudText>
+
+    <MudGrid Spacing="2">
+        @foreach (var opt in _options)
+        {
+            <MudItem xs="12" sm="6">
+                <MudButton Variant="Variant.Outlined"
+                           Color="@OptionColor(opt)"
+                           FullWidth="true"
+                           Disabled="@(_picked is not null)"
+                           Style="min-height:56px;font-size:1.05rem;"
+                           OnClick="@(() => Pick(opt))">
+                    @opt
+                </MudButton>
+            </MudItem>
+        }
+    </MudGrid>
+
+    @if (_picked is not null)
+    {
+        if (_isCorrect)
+        {
+            <MudAlert Severity="Severity.Success" Class="mt-3">
+                @L["Study.Type.Correct"]
+            </MudAlert>
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Warning" Class="mt-3">
+                @string.Format(L["Study.Type.Wrong"].Value, Card.Translation)
+            </MudAlert>
+        }
+    }
+</MudPaper>
+
+@code {
+    [Parameter, EditorRequired] public StudyCard Card { get; set; } = null!;
+    [Parameter, EditorRequired] public EventCallback<StudyAttemptInput> OnAttempt { get; set; }
+
+    private List<string> _options = new();
+    private string? _picked;
+    private bool _isCorrect;
+
+    protected override void OnInitialized()
+    {
+        var pool = new List<string> { Card.Translation };
+        if (Card.Distractors is not null) pool.AddRange(Card.Distractors);
+        var rng = Random.Shared;
+        _options = pool.OrderBy(_ => rng.Next()).ToList();
+    }
+
+    private Color OptionColor(string opt)
+    {
+        if (_picked is null) return Color.Primary;
+        if (opt == Card.Translation) return Color.Success;
+        if (opt == _picked) return Color.Error;
+        return Color.Default;
+    }
+
+    private async Task SpeakTerm()
+    {
+        await JS.InvokeVoidAsync("studyBuddiesSpeech.speak", Card.Term, Card.TermLanguage);
+    }
+
+    private async Task Pick(string option)
+    {
+        if (_picked is not null) return;
+        _picked = option;
+        _isCorrect = option == Card.Translation;
+        var grade = _isCorrect ? ReviewGrade.Good : ReviewGrade.Bad;
+        StateHasChanged();
+        await Task.Delay(700);
+        await OnAttempt.InvokeAsync(new StudyAttemptInput(
+            Card.WordId,
+            StudyMode.MultipleChoice,
+            grade,
+            _isCorrect,
+            option,
+            null));
+    }
+}

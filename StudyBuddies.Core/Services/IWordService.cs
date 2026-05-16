@@ -6,6 +6,8 @@ public interface IWordService
 
     Task<List<WordSummary>> ListWordsAsync(Guid partnershipId, string currentUserId, CancellationToken ct = default);
 
+    Task<List<WordSummary>> ListMyWordsAsync(string userId, CancellationToken ct = default);
+
     Task<WordSummary?> GetWordAsync(Guid wordId, string currentUserId, CancellationToken ct = default);
 
     Task UpdateWordAsync(Guid wordId, string currentUserId, WordCreateInput input, CancellationToken ct = default);

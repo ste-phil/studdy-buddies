@@ -12,6 +12,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
     public DbSet<Review> Reviews => Set<Review>();
 
+    public DbSet<ReviewAttempt> ReviewAttempts => Set<ReviewAttempt>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -88,6 +90,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .OnDelete(DeleteBehavior.Cascade);
 
             b.HasIndex(r => r.WordId).IsUnique();
+        });
+
+        builder.Entity<ReviewAttempt>(b =>
+        {
+            b.HasOne(a => a.Word)
+                .WithMany()
+                .HasForeignKey(a => a.WordId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.Property(a => a.UserAnswer).HasMaxLength(500);
+            b.HasIndex(a => new { a.UserId, a.AnsweredAt });
+            b.HasIndex(a => a.WordId);
         });
     }
 }

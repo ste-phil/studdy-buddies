@@ -57,7 +57,7 @@ else
     </div>
 
     <MudGrid Spacing="3" Class="mt-2">
-        <MudItem xs="12" sm="6">
+        <MudItem xs="12" sm="4">
             <div class="action-card action-card-study"
                  @onclick="@(() => GoTo($"partners/{_current.Id}/study"))">
                 <div class="icon-circle icon-circle-lg icon-circle-primary">
@@ -75,18 +75,11 @@ else
                             @L["Dashboard.Action.Study.Subtitle.None"]
                         }
                     </div>
-                    <MudButton Variant="Variant.Filled"
-                               Color="Color.Primary"
-                               EndIcon="@Icons.Material.Filled.ArrowForward"
-                               Size="Size.Small"
-                               Class="action-card-cta">
-                        @L["Dashboard.Action.Study.Cta"]
-                    </MudButton>
                 </div>
             </div>
         </MudItem>
 
-        <MudItem xs="12" sm="6">
+        <MudItem xs="12" sm="4">
             <div class="action-card action-card-add"
                  @onclick="@(() => GoTo($"partners/{_current.Id}/words/new"))">
                 <div class="icon-circle icon-circle-lg icon-circle-secondary">
@@ -95,12 +88,19 @@ else
                 <div class="action-card-body">
                     <div class="action-card-title">@L["Dashboard.Action.AddWord"]</div>
                     <div class="action-card-subtitle">@L["Dashboard.Action.AddWord.Subtitle"]</div>
-                    <MudButton Variant="Variant.Filled"
-                               Color="Color.Secondary"
-                               Size="Size.Small"
-                               Class="action-card-cta">
-                        @L["Dashboard.Action.AddWord.Cta"]
-                    </MudButton>
+                </div>
+            </div>
+        </MudItem>
+
+        <MudItem xs="12" sm="4">
+            <div class="action-card action-card-words"
+                 @onclick="@(() => GoTo("words"))">
+                <div class="icon-circle icon-circle-lg icon-circle-tertiary">
+                    <MudIcon Icon="@Icons.Material.Filled.LibraryBooks" Style="font-size:1.75rem" />
+                </div>
+                <div class="action-card-body">
+                    <div class="action-card-title">@L["Dashboard.Action.MyWords"]</div>
+                    <div class="action-card-subtitle">@L["Dashboard.Action.MyWords.Subtitle"]</div>
                 </div>
             </div>
         </MudItem>
@@ -162,6 +162,25 @@ else
                 }
             </div>
         </div>
+
+        @if (_accuracy is { Total: > 0 })
+        {
+            <div class="progress-card mt-3">
+                <div class="progress-card-header">
+                    <div class="progress-card-title">@L["Dashboard.Accuracy.Title"]</div>
+                    <div class="progress-card-counter">
+                        @string.Format(L["Dashboard.Accuracy.Body"].Value,
+                            _accuracy.Correct,
+                            _accuracy.Total,
+                            (int)Math.Round(_accuracy.Correct * 100.0 / _accuracy.Total))
+                    </div>
+                </div>
+                <MudProgressLinear Value="@(_accuracy.Correct * 100.0 / _accuracy.Total)"
+                                   Color="Color.Success"
+                                   Rounded="true"
+                                   Size="Size.Large" />
+            </div>
+        }
     }
 }
 
@@ -172,6 +191,7 @@ else
     private string _userLanguage = "";
     private PartnershipSummary? _current;
     private DashboardStats? _stats;
+    private TodayAccuracy? _accuracy;
 
     private double ProgressPercent =>
         _stats is null || _stats.DailyGoal <= 0
@@ -206,7 +226,8 @@ else
             var statsTask = Study.GetStatsAsync(_current.Id, _userId);
             var streakTask = StreakService.GetCurrentStreakAsync(_userId);
             var todayTask = Study.GetTodayReviewCountAsync(_userId);
-            await Task.WhenAll(statsTask, streakTask, todayTask);
+            var accuracyTask = Study.GetTodayAccuracyAsync(_userId);
+            await Task.WhenAll(statsTask, streakTask, todayTask, accuracyTask);
             _stats = new DashboardStats(
                 statsTask.Result.DueCount,
                 statsTask.Result.NewCount,
@@ -214,6 +235,7 @@ else
                 streakTask.Result,
                 todayTask.Result,
                 StudyBuddies.Core.Services.StudyService.DailyGoal);
+            _accuracy = accuracyTask.Result;
         }
         _loading = false;
     }

@@ -1,0 +1,116 @@
+@page "/words"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@rendermode InteractiveServer
+
+@inject IWordService WordService
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IStringLocalizer<SharedResource> L
+
+<PageTitle>@L["MyWords.Title"]</PageTitle>
+
+@if (_loading)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else
+{
+    <MudText Typo="Typo.h5" Class="mb-3">@L["MyWords.Title"]</MudText>
+
+    <MudTextField T="string"
+                  Value="_search"
+                  ValueChanged="OnSearchChanged"
+                  Placeholder="@L["MyWords.SearchPlaceholder"]"
+                  Variant="Variant.Outlined"
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search"
+                  Immediate="true"
+                  Clearable="true"
+                  Class="mb-4" />
+
+    <MudTabs Outlined="true" Position="Position.Top" Rounded="true">
+        <MudTabPanel Text="@string.Format(L["Word.IAuthored"].Value, FilteredByMe.Count)">
+            @if (FilteredByMe.Count == 0)
+            {
+                <MudText Color="Color.Tertiary">
+                    @if (string.IsNullOrWhiteSpace(_search))
+                    {
+                        @L["Word.NoByMe"]
+                    }
+                    else
+                    {
+                        @L["MyWords.NoResults"]
+                    }
+                </MudText>
+            }
+            else
+            {
+                <WordsTable Words="FilteredByMe" CurrentUserId="@_userId" />
+            }
+        </MudTabPanel>
+        <MudTabPanel Text="@string.Format(L["Word.IAmLearning"].Value, FilteredForMe.Count)">
+            @if (FilteredForMe.Count == 0)
+            {
+                <MudText Color="Color.Tertiary">
+                    @if (string.IsNullOrWhiteSpace(_search))
+                    {
+                        @L["Word.NoForMe"]
+                    }
+                    else
+                    {
+                        @L["MyWords.NoResults"]
+                    }
+                </MudText>
+            }
+            else
+            {
+                <WordsTable Words="FilteredForMe" CurrentUserId="@_userId" />
+            }
+        </MudTabPanel>
+    </MudTabs>
+}
+
+@code {
+    private bool _loading = true;
+    private string? _userId;
+    private string _search = "";
+    private List<WordSummary> _byMe = new();
+    private List<WordSummary> _forMe = new();
+
+    private List<WordSummary> FilteredByMe => Filter(_byMe);
+    private List<WordSummary> FilteredForMe => Filter(_forMe);
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        _userId = UserManager.GetUserId(auth.User);
+        if (_userId is null)
+        {
+            _loading = false;
+            return;
+        }
+
+        var words = await WordService.ListMyWordsAsync(_userId);
+        _byMe = words.Where(w => w.ByUserId == _userId).ToList();
+        _forMe = words.Where(w => w.ForUserId == _userId).ToList();
+        _loading = false;
+    }
+
+    private void OnSearchChanged(string value)
+    {
+        _search = value ?? "";
+    }
+
+    private List<WordSummary> Filter(List<WordSummary> source)
+    {
+        if (string.IsNullOrWhiteSpace(_search))
+        {
+            return source;
+        }
+        var needle = _search.Trim();
+        return source
+            .Where(w => w.Term.Contains(needle, StringComparison.OrdinalIgnoreCase) ||
+                        w.Translation.Contains(needle, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+}

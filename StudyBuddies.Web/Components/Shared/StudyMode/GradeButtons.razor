@@ -1,0 +1,20 @@
+@inject IStringLocalizer<SharedResource> L
+
+<div class="grade-buttons mt-6 @(Pulsing is not null ? "is-pulsing-" + Pulsing : "")">
+    <button class="grade-btn grade-bad  @HighlightClass(ReviewGrade.Bad)"  disabled="@Disabled" @onclick="@(() => Click(ReviewGrade.Bad))">@L["Study.Bad"]</button>
+    <button class="grade-btn grade-hard @HighlightClass(ReviewGrade.Hard)" disabled="@Disabled" @onclick="@(() => Click(ReviewGrade.Hard))">@L["Study.Hard"]</button>
+    <button class="grade-btn grade-good @HighlightClass(ReviewGrade.Good)" disabled="@Disabled" @onclick="@(() => Click(ReviewGrade.Good))">@L["Study.Good"]</button>
+    <button class="grade-btn grade-easy @HighlightClass(ReviewGrade.Easy)" disabled="@Disabled" @onclick="@(() => Click(ReviewGrade.Easy))">@L["Study.Easy"]</button>
+</div>
+
+@code {
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public ReviewGrade? Highlight { get; set; }
+    [Parameter] public string? Pulsing { get; set; }
+    [Parameter] public EventCallback<ReviewGrade> OnGrade { get; set; }
+
+    private string HighlightClass(ReviewGrade g) =>
+        Highlight == g ? "is-suggested" : "";
+
+    private Task Click(ReviewGrade g) => OnGrade.InvokeAsync(g);
+}

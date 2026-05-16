@@ -5,6 +5,10 @@
     <HeaderContent>
         <MudTh>@L["Status.Headers.Word"]</MudTh>
         <MudTh>@L["Status.Headers.Translation"]</MudTh>
+        @if (_showPartner)
+        {
+            <MudTh Class="hide-on-mobile">@L["Status.Headers.Partner"]</MudTh>
+        }
         <MudTh Class="hide-on-mobile">@L["Status.Headers.Tags"]</MudTh>
         <MudTh Class="hide-on-mobile">@L["Status.Headers.Status"]</MudTh>
         <MudTh></MudTh>
@@ -18,6 +22,21 @@
             @context.Translation
             <MudText Typo="Typo.caption" Color="Color.Tertiary">@context.TranslationLanguage.ToUpper()</MudText>
         </MudTd>
+        @if (_showPartner)
+        {
+            <MudTd Class="hide-on-mobile">
+                @if (!string.IsNullOrEmpty(context.PartnerDisplayName))
+                {
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                        @if (!string.IsNullOrEmpty(context.PartnerLanguage))
+                        {
+                            <span class="fi fi-@context.PartnerLanguage.ToLower() partner-flag"></span>
+                        }
+                        <span>@context.PartnerDisplayName</span>
+                    </MudStack>
+                }
+            </MudTd>
+        }
         <MudTd Class="hide-on-mobile">
             @foreach (var tag in context.Tags)
             {
@@ -50,4 +69,6 @@
 @code {
     [Parameter, EditorRequired] public List<WordSummary> Words { get; set; } = new();
     [Parameter, EditorRequired] public string? CurrentUserId { get; set; }
+
+    private bool _showPartner => Words.Count > 0 && Words[0].PartnerDisplayName is not null;
 }

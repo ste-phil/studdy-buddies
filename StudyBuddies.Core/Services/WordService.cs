@@ -64,7 +64,38 @@ public class WordService(ApplicationDbContext db) : IWordService
                 w.ForUserId,
                 w.ByUserId == currentUserId,
                 w.CreatedAt,
-                w.Review != null ? w.Review.DueDate : (DateTime?)null))
+                w.Review != null ? w.Review.DueDate : (DateTime?)null,
+                w.PartnershipId))
+            .ToListAsync(ct);
+    }
+
+    public async Task<List<WordSummary>> ListMyWordsAsync(string userId, CancellationToken ct = default)
+    {
+        return await db.Words
+            .AsNoTracking()
+            .Where(w => w.Partnership.Status == PartnershipStatus.Active &&
+                        (w.Partnership.UserAId == userId || w.Partnership.UserBId == userId))
+            .Include(w => w.Partnership).ThenInclude(p => p.UserA)
+            .Include(w => w.Partnership).ThenInclude(p => p.UserB)
+            .Include(w => w.Review)
+            .OrderByDescending(w => w.CreatedAt)
+            .Select(w => new WordSummary(
+                w.Id,
+                w.Term,
+                w.TermLanguage,
+                w.Translation,
+                w.TranslationLanguage,
+                w.Example,
+                w.Notes,
+                w.Tags,
+                w.ByUserId,
+                w.ForUserId,
+                w.ByUserId == userId,
+                w.CreatedAt,
+                w.Review != null ? w.Review.DueDate : (DateTime?)null,
+                w.PartnershipId,
+                w.Partnership.UserAId == userId ? w.Partnership.UserB.DisplayName : w.Partnership.UserA.DisplayName,
+                w.Partnership.UserAId == userId ? w.Partnership.UserB.NativeLanguage : w.Partnership.UserA.NativeLanguage))
             .ToListAsync(ct);
     }
 
@@ -99,7 +130,8 @@ public class WordService(ApplicationDbContext db) : IWordService
             w.ForUserId,
             w.ByUserId == currentUserId,
             w.CreatedAt,
-            w.Review?.DueDate);
+            w.Review?.DueDate,
+            w.PartnershipId);
     }
 
     public async Task UpdateWordAsync(Guid wordId, string currentUserId, WordCreateInput input, CancellationToken ct = default)

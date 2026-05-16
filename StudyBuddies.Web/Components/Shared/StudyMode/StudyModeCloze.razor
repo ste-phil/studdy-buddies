@@ -1,0 +1,125 @@
+@using System.Text.RegularExpressions
+@inject IJSRuntime JS
+@inject IStringLocalizer<SharedResource> L
+
+<MudPaper Class="study-input-card pa-6" Elevation="0" Outlined="true">
+    <MudText Typo="Typo.caption" Color="Color.Tertiary">
+        @Card.TermLanguage.ToUpper()
+    </MudText>
+    <MudText Typo="Typo.body2" Align="Align.Center" Color="Color.Tertiary" Class="mt-2">
+        @L["Study.Cloze.Hint"]
+    </MudText>
+
+    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="my-4">
+        <MudText Typo="Typo.h6">@_clozeSentence</MudText>
+    </MudAlert>
+
+    <MudTextField @ref="_input"
+                  @bind-Value="_answer"
+                  Label="@L["Study.Type.Placeholder"].Value"
+                  Variant="Variant.Outlined"
+                  Disabled="@_revealed"
+                  OnKeyDown="HandleKey"
+                  Immediate="true" />
+
+    @if (!_revealed)
+    {
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   FullWidth="true"
+                   Class="mt-3"
+                   OnClick="Check">
+            @L["Study.Type.Check"]
+        </MudButton>
+    }
+    else
+    {
+        @if (_isCorrect)
+        {
+            <MudAlert Severity="Severity.Success" Class="mt-3">
+                @L["Study.Type.Correct"]
+            </MudAlert>
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Warning" Class="mt-3">
+                @string.Format(L["Study.Type.Wrong"].Value, Card.Term)
+            </MudAlert>
+        }
+        <MudText Typo="Typo.body2" Color="Color.Tertiary" Class="mt-2">
+            @Card.Translation
+        </MudText>
+    }
+</MudPaper>
+
+<GradeButtons Disabled="@(!_revealed)" Highlight="@_proposed" Pulsing="@_pulsing" OnGrade="Grade" />
+
+@code {
+    [Parameter, EditorRequired] public StudyCard Card { get; set; } = null!;
+    [Parameter, EditorRequired] public EventCallback<StudyAttemptInput> OnAttempt { get; set; }
+
+    private MudTextField<string>? _input;
+    private string _answer = "";
+    private string _clozeSentence = "";
+    private bool _revealed;
+    private bool _isCorrect;
+    private ReviewGrade? _proposed;
+    private string? _pulsing;
+
+    protected override void OnInitialized()
+    {
+        _clozeSentence = BuildCloze(Card.Example ?? "", Card.Term);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && _input is not null)
+        {
+            await _input.FocusAsync();
+        }
+    }
+
+    private static string BuildCloze(string example, string term)
+    {
+        if (string.IsNullOrWhiteSpace(example) || string.IsNullOrWhiteSpace(term)) return example;
+        var pattern = $@"\b{Regex.Escape(term)}\b";
+        return Regex.Replace(example, pattern, "____", RegexOptions.IgnoreCase);
+    }
+
+    private void Check()
+    {
+        if (_revealed) return;
+        var (grade, ok) = AnswerNormalizer.Score(_answer, Card.Term);
+        _proposed = grade;
+        _isCorrect = ok;
+        _revealed = true;
+    }
+
+    private async Task HandleKey(KeyboardEventArgs e)
+    {
+        if (e.Key != "Enter") return;
+        if (!_revealed)
+        {
+            Check();
+        }
+        else if (_proposed.HasValue)
+        {
+            await Grade(_proposed.Value);
+        }
+    }
+
+    private async Task Grade(ReviewGrade grade)
+    {
+        if (!_revealed) return;
+        _pulsing = grade.ToString().ToLowerInvariant();
+        StateHasChanged();
+        await Task.Delay(250);
+        await OnAttempt.InvokeAsync(new StudyAttemptInput(
+            Card.WordId,
+            StudyMode.Cloze,
+            grade,
+            grade >= ReviewGrade.Hard,
+            _answer,
+            null));
+    }
+}

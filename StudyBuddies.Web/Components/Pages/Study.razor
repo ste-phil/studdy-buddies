@@ -53,58 +53,7 @@
         }
         else
         {
-            <FlipCard IsFlipped="_revealed" OnClick="HandleCardClick">
-                <FrontContent>
-                    <MudText Typo="Typo.caption" Color="Color.Tertiary">
-                        @_currentCard.TermLanguage.ToUpper()
-                    </MudText>
-                    <MudText Typo="Typo.h3" Align="Align.Center" Class="my-4">
-                        @_currentCard.Term
-                    </MudText>
-                    <div @onclick:stopPropagation="true">
-                        <MudIconButton Icon="@Icons.Material.Filled.VolumeUp"
-                                       OnClick="SpeakTerm"
-                                       Color="Color.Primary" />
-                    </div>
-                    <MudText Typo="Typo.caption" Color="Color.Tertiary" Class="mt-4">
-                        @L["Study.TapToFlip"]
-                    </MudText>
-                </FrontContent>
-                <BackContent>
-                    <MudText Typo="Typo.caption" Color="Color.Tertiary">
-                        @_currentCard.TranslationLanguage.ToUpper()
-                    </MudText>
-                    <MudText Typo="Typo.h4" Align="Align.Center" Class="my-3">
-                        @_currentCard.Translation
-                    </MudText>
-                    @if (!string.IsNullOrWhiteSpace(_currentCard.Example))
-                    {
-                        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-2">
-                            @_currentCard.Example
-                        </MudAlert>
-                    }
-                    @if (!string.IsNullOrWhiteSpace(_currentCard.Notes))
-                    {
-                        <MudText Typo="Typo.body2" Color="Color.Tertiary" Class="mt-2">
-                            @_currentCard.Notes
-                        </MudText>
-                    }
-                </BackContent>
-            </FlipCard>
-
-            <div class="grade-buttons mt-6 @(_pulsing is not null ? "is-pulsing-" + _pulsing : "")">
-                <button class="grade-btn grade-bad"  disabled="@(!_revealed)" @onclick="@(() => Grade(ReviewGrade.Bad))">@L["Study.Bad"]</button>
-                <button class="grade-btn grade-hard" disabled="@(!_revealed)" @onclick="@(() => Grade(ReviewGrade.Hard))">@L["Study.Hard"]</button>
-                <button class="grade-btn grade-good" disabled="@(!_revealed)" @onclick="@(() => Grade(ReviewGrade.Good))">@L["Study.Good"]</button>
-                <button class="grade-btn grade-easy" disabled="@(!_revealed)" @onclick="@(() => Grade(ReviewGrade.Easy))">@L["Study.Easy"]</button>
-            </div>
-
-            @if (!_revealed)
-            {
-                <MudText Typo="Typo.caption" Align="Align.Center" Class="d-block mt-2" Color="Color.Tertiary">
-                    @L["Study.FlipToGrade"]
-                </MudText>
-            }
+            <StudyModeHost @key="_currentCard.WordId" Card="_currentCard" OnAttempt="HandleAttempt" />
         }
     </div>
 </div>
@@ -116,10 +65,8 @@
     private string? _userId;
     private Queue<StudyCard> _queue = new();
     private StudyCard? _currentCard;
-    private bool _revealed;
     private int _total;
     private int _done;
-    private string? _pulsing;
 
     protected override async Task OnInitializedAsync()
     {
@@ -131,45 +78,28 @@
         _queue = new Queue<StudyCard>(cards);
         _total = _queue.Count;
         _done = 0;
-        Next();
+        LoadNext();
         _loading = false;
     }
 
-    private void Next()
+    private void LoadNext()
     {
-        _revealed = false;
         _currentCard = _queue.Count > 0 ? _queue.Dequeue() : null;
     }
 
-    private void HandleCardClick()
+    private async Task HandleAttempt(StudyAttemptInput input)
     {
-        if (!_revealed) _revealed = true;
-    }
-
-    private async Task Grade(ReviewGrade grade)
-    {
-        if (!_revealed || _userId is null || _currentCard is null) return;
-        _pulsing = grade.ToString().ToLowerInvariant();
-        StateHasChanged();
+        if (_userId is null) return;
         try
         {
-            await StudyService.GradeAsync(_currentCard.WordId, _userId, grade);
-            await Task.Delay(300);
+            await StudyService.GradeAsync(input, _userId);
             _done++;
-            _pulsing = null;
-            Next();
+            LoadNext();
         }
         catch (Exception ex)
         {
             Snackbar.Add(ex.Message, Severity.Error);
-            _pulsing = null;
         }
-    }
-
-    private async Task SpeakTerm()
-    {
-        if (_currentCard is null) return;
-        await JS.InvokeVoidAsync("studyBuddiesSpeech.speak", _currentCard.Term, _currentCard.TermLanguage);
     }
 
     private async Task GoBack()

@@ -1,0 +1,143 @@
+@inject IJSRuntime JS
+@inject IStringLocalizer<SharedResource> L
+
+<MudPaper Class="study-input-card pa-6" Elevation="0" Outlined="true">
+    <MudText Typo="Typo.caption" Color="Color.Tertiary">
+        @Card.TermLanguage.ToUpper()
+    </MudText>
+
+    @if (HideTerm && !_revealed)
+    {
+        <MudStack Row="true" Justify="Justify.Center" AlignItems="AlignItems.Center" Class="my-4">
+            <MudIconButton Icon="@Icons.Material.Filled.VolumeUp"
+                           Size="Size.Large"
+                           Color="Color.Primary"
+                           OnClick="SpeakTerm" />
+            <MudText Typo="Typo.h6" Color="Color.Tertiary">@L["Study.Listening.PlayAgain"]</MudText>
+        </MudStack>
+    }
+    else
+    {
+        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center" Class="my-4">
+            <MudText Typo="Typo.h3" Align="Align.Center">@Card.Term</MudText>
+            <MudIconButton Icon="@Icons.Material.Filled.VolumeUp"
+                           OnClick="SpeakTerm"
+                           Color="Color.Primary" />
+        </MudStack>
+    }
+
+    <MudTextField @ref="_input"
+                  @bind-Value="_answer"
+                  Label="@L["Study.Type.Placeholder"].Value"
+                  Variant="Variant.Outlined"
+                  Disabled="@_revealed"
+                  OnKeyDown="HandleKey"
+                  Immediate="true"
+                  Class="mt-2" />
+
+    @if (!_revealed)
+    {
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   FullWidth="true"
+                   Class="mt-3"
+                   OnClick="Check">
+            @L["Study.Type.Check"]
+        </MudButton>
+    }
+    else
+    {
+        @if (_isCorrect)
+        {
+            <MudAlert Severity="Severity.Success" Class="mt-3">
+                @L["Study.Type.Correct"]
+            </MudAlert>
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Warning" Class="mt-3">
+                @string.Format(L["Study.Type.Wrong"].Value, Card.Translation)
+            </MudAlert>
+        }
+        @if (!string.IsNullOrWhiteSpace(Card.Notes))
+        {
+            <MudText Typo="Typo.body2" Color="Color.Tertiary" Class="mt-2">
+                @Card.Notes
+            </MudText>
+        }
+    }
+</MudPaper>
+
+<GradeButtons Disabled="@(!_revealed)" Highlight="@_proposed" Pulsing="@_pulsing" OnGrade="Grade" />
+
+@code {
+    [Parameter, EditorRequired] public StudyCard Card { get; set; } = null!;
+    [Parameter, EditorRequired] public EventCallback<StudyAttemptInput> OnAttempt { get; set; }
+    [Parameter] public bool HideTerm { get; set; }
+    [Parameter] public bool AutoSpeak { get; set; }
+    [Parameter] public StudyMode Mode { get; set; } = StudyMode.Type;
+
+    private MudTextField<string>? _input;
+    private string _answer = "";
+    private bool _revealed;
+    private bool _isCorrect;
+    private ReviewGrade? _proposed;
+    private string? _pulsing;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (AutoSpeak)
+            {
+                await SpeakTerm();
+            }
+            if (_input is not null)
+            {
+                await _input.FocusAsync();
+            }
+        }
+    }
+
+    private async Task SpeakTerm()
+    {
+        await JS.InvokeVoidAsync("studyBuddiesSpeech.speak", Card.Term, Card.TermLanguage);
+    }
+
+    private void Check()
+    {
+        if (_revealed) return;
+        var (grade, ok) = AnswerNormalizer.Score(_answer, Card.Translation);
+        _proposed = grade;
+        _isCorrect = ok;
+        _revealed = true;
+    }
+
+    private async Task HandleKey(KeyboardEventArgs e)
+    {
+        if (e.Key != "Enter") return;
+        if (!_revealed)
+        {
+            Check();
+        }
+        else if (_proposed.HasValue)
+        {
+            await Grade(_proposed.Value);
+        }
+    }
+
+    private async Task Grade(ReviewGrade grade)
+    {
+        if (!_revealed) return;
+        _pulsing = grade.ToString().ToLowerInvariant();
+        StateHasChanged();
+        await Task.Delay(250);
+        await OnAttempt.InvokeAsync(new StudyAttemptInput(
+            Card.WordId,
+            Mode,
+            grade,
+            grade >= ReviewGrade.Hard,
+            _answer,
+            null));
+    }
+}

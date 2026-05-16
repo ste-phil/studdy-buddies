@@ -96,10 +96,10 @@
   <data name="Dashboard.Action.Study" xml:space="preserve"><value>Lernen</value></data>
   <data name="Dashboard.Action.Study.Subtitle.Some" xml:space="preserve"><value>{0} fällig</value></data>
   <data name="Dashboard.Action.Study.Subtitle.None" xml:space="preserve"><value>Alles erledigt</value></data>
-  <data name="Dashboard.Action.Study.Cta" xml:space="preserve"><value>Weiter lernen</value></data>
   <data name="Dashboard.Action.AddWord" xml:space="preserve"><value>Wort hinzufügen</value></data>
   <data name="Dashboard.Action.AddWord.Subtitle" xml:space="preserve"><value>Neues Wort oder Satz speichern</value></data>
-  <data name="Dashboard.Action.AddWord.Cta" xml:space="preserve"><value>Jetzt hinzufügen</value></data>
+  <data name="Dashboard.Action.MyWords" xml:space="preserve"><value>Meine Wörter</value></data>
+  <data name="Dashboard.Action.MyWords.Subtitle" xml:space="preserve"><value>Alle ansehen &amp; bearbeiten</value></data>
   <data name="Dashboard.Stat.Streak" xml:space="preserve"><value>Tage in Folge</value></data>
   <data name="Dashboard.Stat.Streak.Sub" xml:space="preserve"><value>Weiter so! 🔥</value></data>
   <data name="Dashboard.Stat.Streak.Zero" xml:space="preserve"><value>Starte deine Serie!</value></data>
@@ -174,6 +174,11 @@
   <data name="Status.Headers.Translation" xml:space="preserve"><value>Übersetzung</value></data>
   <data name="Status.Headers.Tags" xml:space="preserve"><value>Tags</value></data>
   <data name="Status.Headers.Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Status.Headers.Partner" xml:space="preserve"><value>Partner</value></data>
+
+  <data name="MyWords.Title" xml:space="preserve"><value>Meine Wörter</value></data>
+  <data name="MyWords.SearchPlaceholder" xml:space="preserve"><value>Suche Wort oder Übersetzung…</value></data>
+  <data name="MyWords.NoResults" xml:space="preserve"><value>Keine Treffer.</value></data>
 
   <data name="Study.Title" xml:space="preserve"><value>Lernen</value></data>
   <data name="Study.Remaining" xml:space="preserve"><value>{0} verbleibend</value></data>
@@ -186,6 +191,22 @@
   <data name="Study.Easy" xml:space="preserve"><value>Einfach</value></data>
   <data name="Study.TapToFlip" xml:space="preserve"><value>Tippen zum Drehen</value></data>
   <data name="Study.FlipToGrade" xml:space="preserve"><value>Karte zuerst drehen, um zu bewerten</value></data>
+
+  <data name="Study.Mode.Flashcard" xml:space="preserve"><value>Karteikarte</value></data>
+  <data name="Study.Mode.Type" xml:space="preserve"><value>Tippen</value></data>
+  <data name="Study.Mode.MultipleChoice" xml:space="preserve"><value>Quiz</value></data>
+  <data name="Study.Mode.Listening" xml:space="preserve"><value>Hören</value></data>
+  <data name="Study.Mode.Cloze" xml:space="preserve"><value>Lückentext</value></data>
+  <data name="Study.Type.Placeholder" xml:space="preserve"><value>Deine Antwort …</value></data>
+  <data name="Study.Type.Check" xml:space="preserve"><value>Prüfen</value></data>
+  <data name="Study.Type.Correct" xml:space="preserve"><value>Richtig!</value></data>
+  <data name="Study.Type.Wrong" xml:space="preserve"><value>Richtig wäre: {0}</value></data>
+  <data name="Study.MCQ.Choose" xml:space="preserve"><value>Wähle die richtige Übersetzung</value></data>
+  <data name="Study.Listening.PlayAgain" xml:space="preserve"><value>Nochmal anhören</value></data>
+  <data name="Study.Cloze.Hint" xml:space="preserve"><value>Welches Wort fehlt?</value></data>
+
+  <data name="Dashboard.Accuracy.Title" xml:space="preserve"><value>Heutige Trefferquote</value></data>
+  <data name="Dashboard.Accuracy.Body" xml:space="preserve"><value>{0} von {1} richtig ({2}%)</value></data>
 
   <data name="Register.DisplayName" xml:space="preserve"><value>Anzeigename</value></data>
   <data name="Register.NativeLanguage" xml:space="preserve"><value>Muttersprache</value></data>

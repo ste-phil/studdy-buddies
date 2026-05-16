@@ -32,7 +32,19 @@ public record WordSummary(
     string ForUserId,
     bool IsAuthoredByMe,
     DateTime CreatedAt,
-    DateTime? DueDate);
+    DateTime? DueDate,
+    Guid PartnershipId = default,
+    string? PartnerDisplayName = null,
+    string? PartnerLanguage = null);
+
+public enum StudyMode
+{
+    Flashcard = 0,
+    Type = 1,
+    MultipleChoice = 2,
+    Listening = 3,
+    Cloze = 4,
+}
 
 public record StudyCard(
     Guid WordId,
@@ -41,7 +53,18 @@ public record StudyCard(
     string Translation,
     string TranslationLanguage,
     string? Example,
-    string? Notes);
+    string? Notes,
+    IReadOnlyList<string> Tags,
+    StudyMode Mode,
+    IReadOnlyList<string>? Distractors);
+
+public record StudyAttemptInput(
+    Guid WordId,
+    StudyMode Mode,
+    ReviewGrade Grade,
+    bool IsCorrect,
+    string? UserAnswer,
+    byte? Confidence);
 
 public record DashboardStats(
     int DueCount,

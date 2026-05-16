@@ -41,23 +41,50 @@ public class StudyService(ApplicationDbContext db) : IStudyService
                 .ToListAsync(ct)
             : new List<Word>();
 
-        return dueWords.Concat(newWords)
-            .Select(w => new StudyCard(
+        var allCards = dueWords.Concat(newWords).ToList();
+
+        var translationPool = await db.Words
+            .AsNoTracking()
+            .Where(w => w.PartnershipId == partnershipId && w.ForUserId == learnerUserId)
+            .Select(w => w.Translation)
+            .Distinct()
+            .ToListAsync(ct);
+
+        var rng = Random.Shared;
+        return allCards.Select(w =>
+        {
+            var distractorCount = translationPool.Count(t => t != w.Translation);
+            var mode = StudyModeSelector.Pick(w, w.Review, distractorCount);
+
+            IReadOnlyList<string>? distractors = null;
+            if (mode == StudyMode.MultipleChoice)
+            {
+                distractors = translationPool
+                    .Where(t => t != w.Translation)
+                    .OrderBy(_ => rng.Next())
+                    .Take(3)
+                    .ToList();
+            }
+
+            return new StudyCard(
                 w.Id,
                 w.Term,
                 w.TermLanguage,
                 w.Translation,
                 w.TranslationLanguage,
                 w.Example,
-                w.Notes))
-            .ToList();
+                w.Notes,
+                w.Tags,
+                mode,
+                distractors);
+        }).ToList();
     }
 
-    public async Task GradeAsync(Guid wordId, string learnerUserId, ReviewGrade grade, CancellationToken ct = default)
+    public async Task GradeAsync(StudyAttemptInput input, string learnerUserId, CancellationToken ct = default)
     {
         var word = await db.Words
             .Include(w => w.Review)
-            .FirstOrDefaultAsync(w => w.Id == wordId, ct)
+            .FirstOrDefaultAsync(w => w.Id == input.WordId, ct)
             ?? throw new InvalidOperationException("Word not found.");
 
         if (word.ForUserId != learnerUserId)
@@ -68,12 +95,25 @@ public class StudyService(ApplicationDbContext db) : IStudyService
         var review = word.Review ?? new Review { WordId = word.Id };
         var isNew = word.Review is null;
 
-        Sm2Service.Apply(review, grade, DateTime.UtcNow);
+        var now = DateTime.UtcNow;
+        Sm2Service.Apply(review, input.Grade, now);
 
         if (isNew)
         {
             db.Reviews.Add(review);
         }
+
+        db.ReviewAttempts.Add(new ReviewAttempt
+        {
+            WordId = word.Id,
+            UserId = learnerUserId,
+            Mode = input.Mode,
+            Grade = input.Grade,
+            IsCorrect = input.IsCorrect,
+            UserAnswer = input.UserAnswer,
+            Confidence = input.Confidence,
+            AnsweredAt = now,
+        });
 
         await db.SaveChangesAsync(ct);
     }
@@ -113,6 +153,18 @@ public class StudyService(ApplicationDbContext db) : IStudyService
                 && r.LastReview != null
                 && r.LastReview >= todayUtc)
             .CountAsync(ct);
+    }
+
+    public async Task<TodayAccuracy> GetTodayAccuracyAsync(string learnerUserId, CancellationToken ct = default)
+    {
+        var todayUtc = DateTime.UtcNow.Date;
+        var rows = await db.ReviewAttempts
+            .AsNoTracking()
+            .Where(a => a.UserId == learnerUserId && a.AnsweredAt >= todayUtc)
+            .Select(a => a.IsCorrect)
+            .ToListAsync(ct);
+
+        return new TodayAccuracy(rows.Count, rows.Count(c => c));
     }
 
     private async Task EnsureMemberAsync(Guid partnershipId, string userId, CancellationToken ct)

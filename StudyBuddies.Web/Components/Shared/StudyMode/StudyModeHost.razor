@@ -1,0 +1,48 @@
+@inject IStringLocalizer<SharedResource> L
+
+<MudStack Row="true" Justify="Justify.Center" AlignItems="AlignItems.Center" Class="mb-3">
+    <MudChip T="string" Color="@BadgeColor" Variant="Variant.Filled" Size="Size.Small">
+        @L[$"Study.Mode.{Card.Mode}"]
+    </MudChip>
+    @if (Card.Tags is { Count: > 0 })
+    {
+        @foreach (var tag in Card.Tags)
+        {
+            <MudChip T="string" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Default">@tag</MudChip>
+        }
+    }
+</MudStack>
+
+@switch (Card.Mode)
+{
+    case StudyMode.Flashcard:
+        <StudyModeFlashcard Card="Card" OnAttempt="OnAttempt" />
+        break;
+    case StudyMode.Type:
+        <StudyModeType Card="Card" OnAttempt="OnAttempt" Mode="StudyMode.Type" />
+        break;
+    case StudyMode.Listening:
+        <StudyModeType Card="Card" OnAttempt="OnAttempt" Mode="StudyMode.Listening" HideTerm="true" AutoSpeak="true" />
+        break;
+    case StudyMode.MultipleChoice:
+        <StudyModeMultipleChoice Card="Card" OnAttempt="OnAttempt" />
+        break;
+    case StudyMode.Cloze:
+        <StudyModeCloze Card="Card" OnAttempt="OnAttempt" />
+        break;
+}
+
+@code {
+    [Parameter, EditorRequired] public StudyCard Card { get; set; } = null!;
+    [Parameter, EditorRequired] public EventCallback<StudyAttemptInput> OnAttempt { get; set; }
+
+    private Color BadgeColor => Card.Mode switch
+    {
+        StudyMode.Flashcard => Color.Default,
+        StudyMode.Type => Color.Primary,
+        StudyMode.Listening => Color.Secondary,
+        StudyMode.MultipleChoice => Color.Info,
+        StudyMode.Cloze => Color.Tertiary,
+        _ => Color.Default,
+    };
+}
