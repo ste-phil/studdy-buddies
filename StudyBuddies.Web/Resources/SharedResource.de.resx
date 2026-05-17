@@ -93,6 +93,7 @@
   <data name="Dashboard.Hello" xml:space="preserve"><value>Hallo {0}</value></data>
   <data name="CoupleHub.DaysTogether" xml:space="preserve"><value>Tage zusammen ❤️</value></data>
   <data name="CoupleHub.JustStarted" xml:space="preserve"><value>Frisch verbunden — los geht's! 💕</value></data>
+  <data name="CoupleHub.Switch" xml:space="preserve"><value>Partner wechseln</value></data>
   <data name="Sweet.Thinking" xml:space="preserve"><value>{0} denkt grad an dich</value></data>
   <data name="Sweet.GoodTeam" xml:space="preserve"><value>Ihr seid ein gutes Team</value></data>
   <data name="Sweet.GoodDay" xml:space="preserve"><value>Heute ist ein guter Tag fürs Lernen</value></data>

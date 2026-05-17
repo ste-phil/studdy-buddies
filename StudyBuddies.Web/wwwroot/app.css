@@ -412,6 +412,48 @@ h1:focus {
     font-weight: 800;
 }
 
+.couple-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0.75rem auto 0;
+    padding: 0.4rem 0.95rem;
+    border: 1px solid rgba(var(--sb-color-primary-rgb), 0.32);
+    border-radius: var(--sb-radius-pill);
+    background: var(--sb-surface);
+    color: var(--sb-text-primary);
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        transform var(--sb-motion-fast) var(--sb-ease-bounce),
+        box-shadow var(--sb-motion-base) var(--sb-ease-soft),
+        border-color var(--sb-motion-base) ease;
+    position: relative;
+    z-index: 1;
+}
+
+.couple-hub {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.couple-switch:hover {
+    transform: translateY(-1px) scale(1.03);
+    border-color: var(--sb-color-primary);
+    box-shadow: var(--sb-shadow-glow);
+}
+
+.couple-switch:active {
+    transform: scale(0.96);
+}
+
+.couple-switch .mud-icon-root {
+    color: var(--sb-color-primary);
+}
+
 .couple-deco {
     position: absolute;
     font-size: 1rem;

@@ -27,12 +27,20 @@
             <span class="couple-days">@DaysTogether</span> @L["CoupleHub.DaysTogether"]
         }
     </div>
+    @if (OnSwitch.HasDelegate)
+    {
+        <button type="button" class="couple-switch" @onclick="OnSwitch" title="@L["CoupleHub.Switch"]">
+            <MudIcon Icon="@Icons.Material.Filled.SwapHoriz" Size="Size.Small" />
+            <span>@L["CoupleHub.Switch"]</span>
+        </button>
+    }
 </div>
 
 @code {
     [Parameter, EditorRequired] public PartnershipSummary Partnership { get; set; } = null!;
     [Parameter, EditorRequired] public string MyDisplayName { get; set; } = "";
     [Parameter, EditorRequired] public string MyLanguage { get; set; } = "";
+    [Parameter] public EventCallback OnSwitch { get; set; }
 
     private int DaysTogether
     {

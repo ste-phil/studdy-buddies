@@ -40,26 +40,14 @@ else
             }
         </div>
 
-        <MudChip T="string"
-                 Color="Color.Default"
-                 Variant="Variant.Outlined"
-                 OnClick="OpenSwitcher"
-                 Class="partner-chip"
-                 Size="Size.Medium">
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                <span class="fi fi-@_current.Partner.NativeLanguage.ToLower() partner-flag"></span>
-                <span>@_current.Partner.DisplayName</span>
-                <MudIcon Icon="@Icons.Material.Filled.SwapHoriz" Size="Size.Small" />
-                <span class="fi fi-@_userLanguage.ToLower() partner-flag"></span>
-                <span>@_displayName</span>
-                <MudIcon Icon="@Icons.Material.Filled.ArrowDropDown" Size="Size.Small" />
-            </MudStack>
-        </MudChip>
     </div>
 
     <SweetMessage PartnerName="@_current.Partner.DisplayName" />
 
-    <CoupleHub Partnership="_current" MyDisplayName="@_displayName" MyLanguage="@_userLanguage" />
+    <CoupleHub Partnership="_current"
+               MyDisplayName="@_displayName"
+               MyLanguage="@_userLanguage"
+               OnSwitch="OpenSwitcher" />
 
     <MudGrid Spacing="3" Class="mt-2">
         <MudItem xs="12" sm="4">
