@@ -1,0 +1,119 @@
+@inject IJSRuntime JS
+@inject IStringLocalizer<SharedResource> L
+
+<FlipCard IsFlipped="_revealed" OnClick="HandleClick">
+    <FrontContent>
+        <MudText Typo="Typo.caption" Color="Color.Tertiary">
+            @Card.TermLanguage.ToUpper()
+        </MudText>
+        <div @onclick:stopPropagation="true" class="my-4">
+            <MudIconButton Icon="@Icons.Material.Filled.VolumeUp"
+                           Size="Size.Large"
+                           Color="Color.Primary"
+                           Style="font-size:3rem;width:96px;height:96px;"
+                           OnClick="SpeakTerm" />
+        </div>
+        <MudText Typo="Typo.body2" Color="Color.Tertiary">
+            @L["Study.Listening.PlayAgain"]
+        </MudText>
+        <MudText Typo="Typo.caption" Color="Color.Tertiary" Class="mt-4">
+            @L["Study.TapToFlip"]
+        </MudText>
+    </FrontContent>
+    <BackContent>
+        <MudText Typo="Typo.caption" Color="Color.Tertiary">
+            @Card.TermLanguage.ToUpper()
+        </MudText>
+        <MudText Typo="Typo.h3" Align="Align.Center" Class="my-2">
+            @Card.Term
+        </MudText>
+        <MudText Typo="Typo.caption" Color="Color.Tertiary">
+            @Card.TranslationLanguage.ToUpper()
+        </MudText>
+        <MudText Typo="Typo.h4" Align="Align.Center" Class="my-2">
+            @Card.Translation
+        </MudText>
+        @if (!string.IsNullOrWhiteSpace(Card.Example))
+        {
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-2">
+                @Card.Example
+            </MudAlert>
+        }
+        @if (!string.IsNullOrWhiteSpace(Card.Notes))
+        {
+            <MudText Typo="Typo.body2" Color="Color.Tertiary" Class="mt-2">
+                @Card.Notes
+            </MudText>
+        }
+    </BackContent>
+</FlipCard>
+
+<GradeButtons Disabled="@(!_revealed)" Pulsing="@_pulsing" OnGrade="Grade" />
+
+@if (!_revealed)
+{
+    <MudText Typo="Typo.caption" Align="Align.Center" Class="d-block mt-2" Color="Color.Tertiary">
+        @L["Study.FlipToGrade"]
+    </MudText>
+}
+
+@code {
+    [Parameter, EditorRequired] public StudyCard Card { get; set; } = null!;
+    [Parameter, EditorRequired] public EventCallback<StudyAttemptInput> OnAttempt { get; set; }
+
+    private bool _revealed;
+    private string? _pulsing;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await SpeakTerm();
+        }
+    }
+
+    private async Task HandleClick()
+    {
+        if (_revealed) return;
+        _revealed = true;
+        try { await JS.InvokeVoidAsync("studyBuddiesSound.flip"); }
+        catch { /* ignore */ }
+    }
+
+    private async Task SpeakTerm()
+    {
+        await JS.InvokeVoidAsync("studyBuddiesSpeech.speak", Card.Term, Card.TermLanguage);
+    }
+
+    private async Task Grade(ReviewGrade grade)
+    {
+        if (!_revealed) return;
+        _pulsing = grade.ToString().ToLowerInvariant();
+        try
+        {
+            if (grade >= ReviewGrade.Good)
+            {
+                await JS.InvokeVoidAsync("studyBuddiesConfetti.burst", grade == ReviewGrade.Easy ? 52 : 36);
+                await JS.InvokeVoidAsync("studyBuddiesSound.success");
+            }
+            else if (grade == ReviewGrade.Bad)
+            {
+                await JS.InvokeVoidAsync("studyBuddiesSound.error");
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("studyBuddiesSound.pop");
+            }
+        }
+        catch { /* ignore prerender */ }
+        StateHasChanged();
+        await Task.Delay(280);
+        await OnAttempt.InvokeAsync(new StudyAttemptInput(
+            Card.WordId,
+            StudyMode.Listening,
+            grade,
+            grade >= ReviewGrade.Hard,
+            null,
+            null));
+    }
+}

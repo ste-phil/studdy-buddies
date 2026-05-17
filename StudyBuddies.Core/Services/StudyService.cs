@@ -43,35 +43,99 @@ public class StudyService(ApplicationDbContext db) : IStudyService
 
         var allCards = dueWords.Concat(newWords).ToList();
 
-        var translationPool = await db.Words
+        return await BuildCardsAsync(allCards, partnershipId, learnerUserId, ct);
+    }
+
+    public async Task<List<StudyCard>> GetExtraPracticeCardsAsync(Guid partnershipId, string learnerUserId, int max = 20, CancellationToken ct = default)
+    {
+        await EnsureMemberAsync(partnershipId, learnerUserId, ct);
+
+        var newWords = await db.Words
             .AsNoTracking()
-            .Where(w => w.PartnershipId == partnershipId && w.ForUserId == learnerUserId)
-            .Select(w => w.Translation)
-            .Distinct()
+            .Where(w => w.PartnershipId == partnershipId
+                && w.ForUserId == learnerUserId
+                && w.Review == null)
+            .OrderBy(w => w.CreatedAt)
+            .Take(max)
             .ToListAsync(ct);
 
-        var rng = Random.Shared;
-        return allCards.Select(w =>
+        var remaining = Math.Max(0, max - newWords.Count);
+        var reviewedWords = remaining > 0
+            ? await db.Words
+                .AsNoTracking()
+                .Where(w => w.PartnershipId == partnershipId
+                    && w.ForUserId == learnerUserId
+                    && w.Review != null)
+                .Include(w => w.Review)
+                .OrderBy(w => w.Review!.DueDate)
+                .Take(remaining)
+                .ToListAsync(ct)
+            : new List<Word>();
+
+        var allWords = newWords.Concat(reviewedWords).ToList();
+        return await BuildCardsAsync(allWords, partnershipId, learnerUserId, ct);
+    }
+
+    private async Task<List<StudyCard>> BuildCardsAsync(List<Word> words, Guid partnershipId, string learnerUserId, CancellationToken ct)
+    {
+        if (words.Count == 0)
         {
-            var distractorCount = translationPool.Count(t => t != w.Translation);
-            var mode = StudyModeSelector.Pick(w, w.Review, distractorCount);
+            return new List<StudyCard>();
+        }
+
+        var pool = await db.Words
+            .AsNoTracking()
+            .Where(w => w.PartnershipId == partnershipId && w.ForUserId == learnerUserId)
+            .Select(w => new { w.Term, w.Translation })
+            .ToListAsync(ct);
+        var termPool = pool.Select(x => x.Term).Distinct().ToList();
+        var translationPool = pool.Select(x => x.Translation).Distinct().ToList();
+
+        var rng = Random.Shared;
+        return words.Select(w =>
+        {
+            var forwardDistractorCount = translationPool.Count(t => t != w.Translation);
+            var mode = StudyModeSelector.Pick(w, w.Review, forwardDistractorCount);
+
+            // Cloze stays forward (Example is in TermLanguage). Other modes flip 50/50.
+            var reversed = mode != StudyMode.Cloze && rng.Next(2) == 0;
+
+            var promptText = reversed ? w.Translation : w.Term;
+            var promptLang = reversed ? w.TranslationLanguage : w.TermLanguage;
+            var answerText = reversed ? w.Term : w.Translation;
+            var answerLang = reversed ? w.TermLanguage : w.TranslationLanguage;
+            var sourcePool = reversed ? termPool : translationPool;
 
             IReadOnlyList<string>? distractors = null;
             if (mode == StudyMode.MultipleChoice)
             {
-                distractors = translationPool
-                    .Where(t => t != w.Translation)
+                distractors = sourcePool
+                    .Where(t => t != answerText)
                     .OrderBy(_ => rng.Next())
                     .Take(3)
                     .ToList();
+
+                // If reversal left too few distractors, fall back to forward.
+                if (distractors.Count < 3 && reversed)
+                {
+                    distractors = translationPool
+                        .Where(t => t != w.Translation)
+                        .OrderBy(_ => rng.Next())
+                        .Take(3)
+                        .ToList();
+                    promptText = w.Term;
+                    promptLang = w.TermLanguage;
+                    answerText = w.Translation;
+                    answerLang = w.TranslationLanguage;
+                }
             }
 
             return new StudyCard(
                 w.Id,
-                w.Term,
-                w.TermLanguage,
-                w.Translation,
-                w.TranslationLanguage,
+                promptText,
+                promptLang,
+                answerText,
+                answerLang,
                 w.Example,
                 w.Notes,
                 w.Tags,

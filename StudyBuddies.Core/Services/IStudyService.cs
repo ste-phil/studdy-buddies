@@ -8,6 +8,8 @@ public interface IStudyService
 {
     Task<List<StudyCard>> GetDueCardsAsync(Guid partnershipId, string learnerUserId, int max = 20, int newPerDay = 10, CancellationToken ct = default);
 
+    Task<List<StudyCard>> GetExtraPracticeCardsAsync(Guid partnershipId, string learnerUserId, int max = 20, CancellationToken ct = default);
+
     Task GradeAsync(StudyAttemptInput input, string learnerUserId, CancellationToken ct = default);
 
     Task<StudyStats> GetStatsAsync(Guid partnershipId, string learnerUserId, CancellationToken ct = default);

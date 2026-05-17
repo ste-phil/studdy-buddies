@@ -832,6 +832,24 @@ h1:focus {
 .grade-good { background: linear-gradient(135deg, #7FD1B0 0%, #5DB893 100%); }
 .grade-easy { background: linear-gradient(135deg, #B6A4E8 0%, #9D87DC 100%); }
 
+.grade-key {
+    display: inline-block;
+    min-width: 1.4em;
+    padding: 0 0.35em;
+    margin-right: 0.4em;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    font: 600 0.8rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    text-align: center;
+    vertical-align: middle;
+}
+
+@media (max-width: 600px) {
+    .grade-key { display: none; }
+}
+
 .grade-btn:hover:not(:disabled) {
     transform: translateY(-2px) scale(1.04);
     box-shadow: 0 8px 22px rgba(58, 46, 63, 0.18);
