@@ -1,0 +1,50 @@
+@inject IStringLocalizer<SharedResource> L
+
+<div class="achievements-section">
+    <div class="achievements-title">@L["Dashboard.Achievements.Title"]</div>
+    <div class="achievements-row">
+        @foreach (var b in _badges)
+        {
+            <MudTooltip Text="@(b.Unlocked ? L[b.DescKey].Value : L["Badge.Locked"].Value)"
+                        Placement="Placement.Top">
+                <div class="badge-tile @(b.Unlocked ? "is-unlocked" : "is-locked")"
+                     style="animation-delay: @(b.Delay)ms">
+                    <div class="badge-emoji" aria-hidden="true">@b.Emoji</div>
+                    <div class="badge-label">@L[b.LabelKey]</div>
+                    @if (!b.Unlocked)
+                    {
+                        <div class="badge-lock" aria-hidden="true">🔒</div>
+                    }
+                </div>
+            </MudTooltip>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public DashboardStats Stats { get; set; } = null!;
+    [Parameter] public int? AccuracyPercent { get; set; }
+
+    private record Badge(string Emoji, string LabelKey, string DescKey, bool Unlocked, int Delay);
+
+    private List<Badge> _badges = new();
+
+    protected override void OnParametersSet()
+    {
+        var goalReached = Stats.DailyGoal > 0 && Stats.TodayCount >= Stats.DailyGoal;
+        var sharp = AccuracyPercent.HasValue && AccuracyPercent.Value >= 80;
+
+        _badges = new List<Badge>
+        {
+            new("🌱", "Badge.FirstSteps",    "Badge.FirstSteps.Desc",    Stats.LearnedCount >= 1,   0),
+            new("🎓", "Badge.WordCollector", "Badge.WordCollector.Desc", Stats.LearnedCount >= 50,  80),
+            new("🔥", "Badge.OnFire",        "Badge.OnFire.Desc",        Stats.Streak >= 3,         160),
+            new("✨", "Badge.WeekStreak",    "Badge.WeekStreak.Desc",    Stats.Streak >= 7,         240),
+            new("🏆", "Badge.GoalHero",      "Badge.GoalHero.Desc",      goalReached,               320),
+            new("🎯", "Badge.Sharpshooter",  "Badge.Sharpshooter.Desc",  sharp,                     400),
+        };
+    }
+
+    public IReadOnlyList<string> UnlockedKeys()
+        => _badges.Where(b => b.Unlocked).Select(b => b.LabelKey).ToList();
+}

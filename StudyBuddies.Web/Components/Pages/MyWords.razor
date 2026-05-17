@@ -11,60 +11,76 @@
 
 @if (_loading)
 {
-    <MudProgressCircular Indeterminate="true" />
+    <div class="d-flex justify-center pa-12">
+        <MudProgressCircular Indeterminate="true" />
+    </div>
 }
 else
 {
-    <MudText Typo="Typo.h5" Class="mb-3">@L["MyWords.Title"]</MudText>
+    <div class="dashboard-hero">
+        <h1>@L["MyWords.Title"] <span aria-hidden="true">📚</span></h1>
+        <div class="hero-subtitle">@L["MyWords.Subtitle"]</div>
+    </div>
 
-    <MudTextField T="string"
-                  Value="_search"
-                  ValueChanged="OnSearchChanged"
-                  Placeholder="@L["MyWords.SearchPlaceholder"]"
-                  Variant="Variant.Outlined"
-                  Adornment="Adornment.Start"
-                  AdornmentIcon="@Icons.Material.Filled.Search"
-                  Immediate="true"
-                  Clearable="true"
-                  Class="mb-4" />
+    <div class="sb-card words-search mb-4">
+        <MudTextField T="string"
+                      Value="_search"
+                      ValueChanged="OnSearchChanged"
+                      Placeholder="@L["MyWords.SearchPlaceholder"]"
+                      Variant="Variant.Outlined"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Immediate="true"
+                      Clearable="true" />
+    </div>
 
-    <MudTabs Outlined="true" Position="Position.Top" Rounded="true">
+    <MudTabs Class="words-tabs" Position="Position.Top" Rounded="true" HideSlider="false">
         <MudTabPanel Text="@string.Format(L["Word.IAuthored"].Value, FilteredByMe.Count)">
             @if (FilteredByMe.Count == 0)
             {
-                <MudText Color="Color.Tertiary">
-                    @if (string.IsNullOrWhiteSpace(_search))
-                    {
-                        @L["Word.NoByMe"]
-                    }
-                    else
-                    {
-                        @L["MyWords.NoResults"]
-                    }
-                </MudText>
+                <div class="words-empty">
+                    <span class="words-empty-emoji" aria-hidden="true">🌱</span>
+                    <span>
+                        @if (string.IsNullOrWhiteSpace(_search))
+                        {
+                            @L["Word.NoByMe"]
+                        }
+                        else
+                        {
+                            @L["MyWords.NoResults"]
+                        }
+                    </span>
+                </div>
             }
             else
             {
-                <WordsTable Words="FilteredByMe" CurrentUserId="@_userId" />
+                <div class="sb-card words-table-card">
+                    <WordsTable Words="FilteredByMe" CurrentUserId="@_userId" />
+                </div>
             }
         </MudTabPanel>
         <MudTabPanel Text="@string.Format(L["Word.IAmLearning"].Value, FilteredForMe.Count)">
             @if (FilteredForMe.Count == 0)
             {
-                <MudText Color="Color.Tertiary">
-                    @if (string.IsNullOrWhiteSpace(_search))
-                    {
-                        @L["Word.NoForMe"]
-                    }
-                    else
-                    {
-                        @L["MyWords.NoResults"]
-                    }
-                </MudText>
+                <div class="words-empty">
+                    <span class="words-empty-emoji" aria-hidden="true">🌷</span>
+                    <span>
+                        @if (string.IsNullOrWhiteSpace(_search))
+                        {
+                            @L["Word.NoForMe"]
+                        }
+                        else
+                        {
+                            @L["MyWords.NoResults"]
+                        }
+                    </span>
+                </div>
             }
             else
             {
-                <WordsTable Words="FilteredForMe" CurrentUserId="@_userId" />
+                <div class="sb-card words-table-card">
+                    <WordsTable Words="FilteredForMe" CurrentUserId="@_userId" />
+                </div>
             }
         </MudTabPanel>
     </MudTabs>

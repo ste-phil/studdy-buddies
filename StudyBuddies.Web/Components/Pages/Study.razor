@@ -8,6 +8,7 @@
 @inject IJSRuntime JS
 @inject ISnackbar Snackbar
 @inject NavigationManager Nav
+@inject CelebrationBus Celebration
 @inject IStringLocalizer<SharedResource> L
 
 <PageTitle>@L["Study.Title"]</PageTitle>
@@ -28,11 +29,12 @@
 
         @if (!_loading && _total > 0)
         {
-            <MudProgressLinear Color="Color.Primary"
-                               Value="@(_total == 0 ? 0 : (_done * 100.0 / _total))"
-                               Rounded="true"
-                               Size="Size.Medium"
-                               Class="mb-6" />
+            <div class="sb-progress mb-6">
+                <MudProgressLinear Color="Color.Primary"
+                                   Value="@(_total == 0 ? 0 : (_done * 100.0 / _total))"
+                                   Rounded="true"
+                                   Size="Size.Medium" />
+            </div>
         }
 
         @if (_loading)
@@ -91,6 +93,8 @@
         _currentCard = _queue.Count > 0 ? _queue.Dequeue() : null;
     }
 
+    private bool _celebratedSession;
+
     private async Task HandleAttempt(StudyAttemptInput input)
     {
         if (_userId is null) return;
@@ -99,6 +103,16 @@
             await StudyService.GradeAsync(input, _userId);
             _done++;
             LoadNext();
+
+            if (_currentCard is null && _total > 0 && !_celebratedSession)
+            {
+                _celebratedSession = true;
+                await Celebration.FireAsync(new CelebrationPayload(
+                    CelebrationKind.SessionComplete,
+                    "🎉",
+                    L["Celebration.Session.Title"].Value,
+                    L["Celebration.Session.Sub"].Value));
+            }
         }
         catch (Exception ex)
         {

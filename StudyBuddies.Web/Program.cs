@@ -8,6 +8,7 @@ using StudyBuddies.Core.Services;
 using StudyBuddies.Web.Components;
 using StudyBuddies.Web.Components.Account;
 using StudyBuddies.Web.Dev;
+using StudyBuddies.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddMudServices();
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+builder.Services.AddScoped<CelebrationBus>();
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityRedirectManager>();

@@ -11,6 +11,7 @@
 @inject NavigationManager Nav
 @inject IDialogService DialogService
 @inject IJSRuntime JS
+@inject CelebrationBus Celebration
 @inject IStringLocalizer<SharedResource> L
 
 <PageTitle>@L["Dashboard.Title"]</PageTitle>
@@ -101,6 +102,9 @@ else
 
     @if (_stats is not null)
     {
+        <AchievementBadges Stats="_stats"
+                           AccuracyPercent="@(_accuracy is { Total: > 0 } a ? (int)Math.Round(a.Correct * 100.0 / a.Total) : (int?)null)" />
+
         <MudGrid Spacing="3" Class="mt-1">
             <MudItem xs="6" sm="3">
                 <StatTile Variant="streak"
@@ -141,10 +145,13 @@ else
                     <span class="ml-1" aria-hidden="true">🏆</span>
                 </div>
             </div>
-            <MudProgressLinear Value="@ProgressPercent"
-                               Color="Color.Tertiary"
-                               Rounded="true"
-                               Size="Size.Large" />
+            <div class="sb-progress">
+                <MudProgressLinear Value="@ProgressPercent"
+                                   Color="Color.Tertiary"
+                                   Rounded="true"
+                                   Size="Size.Large" />
+            </div>
+            <div class="progress-card-connection">@L["Dashboard.Progress.Connection"]</div>
             @if (GoalReached)
             {
                 <div class="progress-card-celebrate">
@@ -172,10 +179,13 @@ else
                             (int)Math.Round(_accuracy.Correct * 100.0 / _accuracy.Total))
                     </div>
                 </div>
-                <MudProgressLinear Value="@(_accuracy.Correct * 100.0 / _accuracy.Total)"
-                                   Color="Color.Success"
-                                   Rounded="true"
-                                   Size="Size.Large" />
+                <div class="sb-progress sb-progress-success">
+                    <MudProgressLinear Value="@(_accuracy.Correct * 100.0 / _accuracy.Total)"
+                                       Color="Color.Success"
+                                       Rounded="true"
+                                       Size="Size.Large" />
+                </div>
+                <div class="progress-card-sub">@L["Dashboard.Accuracy.Sub"]</div>
             </div>
         }
     }
@@ -204,7 +214,17 @@ else
     {
         if (!firstRender || !GoalReached || _celebratedOnce) return;
         _celebratedOnce = true;
-        try { await JS.InvokeVoidAsync("studyBuddiesConfetti.burst", 48); }
+        try
+        {
+            var alreadySeenToday = await JS.InvokeAsync<bool>("studyBuddiesPrefs.seenGoalToday");
+            if (alreadySeenToday) return;
+            await JS.InvokeVoidAsync("studyBuddiesPrefs.markGoalSeen");
+            await Celebration.FireAsync(new CelebrationPayload(
+                CelebrationKind.DailyGoal,
+                "🏆",
+                L["Celebration.Goal.Title"].Value,
+                L["Celebration.Goal.Sub"].Value));
+        }
         catch { /* ignore prerender / JS unavailable */ }
     }
 

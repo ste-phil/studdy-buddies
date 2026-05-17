@@ -125,7 +125,8 @@
   <data name="Dashboard.Stat.Due.Sub" xml:space="preserve"><value>Heute</value></data>
   <data name="Dashboard.Stat.Progress" xml:space="preserve"><value>Fortschritt</value></data>
   <data name="Dashboard.Stat.Progress.Sub" xml:space="preserve"><value>Tagesziel</value></data>
-  <data name="Dashboard.Progress.Title" xml:space="preserve"><value>Dein Lernfortschritt</value></data>
+  <data name="Dashboard.Progress.Title" xml:space="preserve"><value>Gemeinsam lernen ❤️</value></data>
+  <data name="Dashboard.Progress.Connection" xml:space="preserve"><value>Connection progress ✨</value></data>
   <data name="Dashboard.Progress.Done" xml:space="preserve"><value>{0} / {1} Karten heute</value></data>
   <data name="Dashboard.Progress.Remaining" xml:space="preserve"><value>Noch {0} Karten bis zum Tagesziel!</value></data>
   <data name="Dashboard.Progress.Reached" xml:space="preserve"><value>Tagesziel erreicht! 🎉</value></data>
@@ -193,8 +194,10 @@
   <data name="Status.Headers.Partner" xml:space="preserve"><value>Partner</value></data>
 
   <data name="MyWords.Title" xml:space="preserve"><value>Meine Wörter</value></data>
+  <data name="MyWords.Subtitle" xml:space="preserve"><value>Eure gemeinsame Sammlung 💕</value></data>
   <data name="MyWords.SearchPlaceholder" xml:space="preserve"><value>Suche Wort oder Übersetzung…</value></data>
   <data name="MyWords.NoResults" xml:space="preserve"><value>Keine Treffer.</value></data>
+  <data name="Word.New.Hero" xml:space="preserve"><value>Neues Wort hinzufügen ✨</value></data>
 
   <data name="Study.Title" xml:space="preserve"><value>Lernen</value></data>
   <data name="Study.Remaining" xml:space="preserve"><value>{0} verbleibend</value></data>
@@ -223,6 +226,28 @@
 
   <data name="Dashboard.Accuracy.Title" xml:space="preserve"><value>Heutige Trefferquote</value></data>
   <data name="Dashboard.Accuracy.Body" xml:space="preserve"><value>{0} von {1} richtig ({2}%)</value></data>
+  <data name="Dashboard.Accuracy.Sub" xml:space="preserve"><value>Jeden Tag stärker 🌷</value></data>
+
+  <data name="Dashboard.Achievements.Title" xml:space="preserve"><value>Erfolge ✨</value></data>
+  <data name="Badge.Locked" xml:space="preserve"><value>Noch gesperrt</value></data>
+  <data name="Badge.FirstSteps" xml:space="preserve"><value>Erste Schritte</value></data>
+  <data name="Badge.FirstSteps.Desc" xml:space="preserve"><value>Erstes Wort gelernt 🌱</value></data>
+  <data name="Badge.WordCollector" xml:space="preserve"><value>Wortsammler</value></data>
+  <data name="Badge.WordCollector.Desc" xml:space="preserve"><value>50 Wörter gemeistert 🎓</value></data>
+  <data name="Badge.OnFire" xml:space="preserve"><value>Auf Fahrt</value></data>
+  <data name="Badge.OnFire.Desc" xml:space="preserve"><value>3 Tage in Folge gelernt 🔥</value></data>
+  <data name="Badge.WeekStreak" xml:space="preserve"><value>Wochen-Streak</value></data>
+  <data name="Badge.WeekStreak.Desc" xml:space="preserve"><value>7 Tage in Folge — du brennst ✨</value></data>
+  <data name="Badge.GoalHero" xml:space="preserve"><value>Tagesziel-Held</value></data>
+  <data name="Badge.GoalHero.Desc" xml:space="preserve"><value>Heutiges Tagesziel erreicht 🏆</value></data>
+  <data name="Badge.Sharpshooter" xml:space="preserve"><value>Scharfschütze</value></data>
+  <data name="Badge.Sharpshooter.Desc" xml:space="preserve"><value>Trefferquote heute ≥ 80% 🎯</value></data>
+
+  <data name="Celebration.Goal.Title" xml:space="preserve"><value>Tagesziel geschafft!</value></data>
+  <data name="Celebration.Goal.Sub" xml:space="preserve"><value>Wundervoll — bis morgen 💕</value></data>
+  <data name="Celebration.Session.Title" xml:space="preserve"><value>Alle Karten erledigt!</value></data>
+  <data name="Celebration.Session.Sub" xml:space="preserve"><value>Ihr seid ein starkes Team ✨</value></data>
+  <data name="Celebration.Badge.Title" xml:space="preserve"><value>Neuer Erfolg: {0}</value></data>
 
   <data name="Register.DisplayName" xml:space="preserve"><value>Anzeigename</value></data>
   <data name="Register.NativeLanguage" xml:space="preserve"><value>Muttersprache</value></data>

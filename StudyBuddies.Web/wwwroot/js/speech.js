@@ -145,6 +145,40 @@ window.studyBuddiesHotkeys = {
     }
 };
 
+window.studyBuddiesPrefs = (function () {
+    const todayKey = () => 'sb_goal_seen_' + new Date().toISOString().slice(0, 10);
+    const badgesKey = 'sb_badges_seen';
+    const safeStorage = () => { try { return window.localStorage; } catch (e) { return null; } };
+    return {
+        seenGoalToday: function () {
+            const s = safeStorage(); if (!s) return false;
+            try { return s.getItem(todayKey()) === '1'; } catch (e) { return false; }
+        },
+        markGoalSeen: function () {
+            const s = safeStorage(); if (!s) return;
+            try { s.setItem(todayKey(), '1'); } catch (e) { }
+        },
+        getSeenBadges: function () {
+            const s = safeStorage(); if (!s) return [];
+            try {
+                const raw = s.getItem(badgesKey);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
+        },
+        addSeenBadge: function (key) {
+            const s = safeStorage(); if (!s) return false;
+            try {
+                const raw = s.getItem(badgesKey);
+                const list = raw ? JSON.parse(raw) : [];
+                if (list.indexOf(key) >= 0) return false;
+                list.push(key);
+                s.setItem(badgesKey, JSON.stringify(list));
+                return true;
+            } catch (e) { return false; }
+        }
+    };
+})();
+
 window.studyBuddiesSpeech = {
     speak: function (text, lang) {
         if (!('speechSynthesis' in window)) {

@@ -14,28 +14,34 @@
 
 @if (_partnership is null)
 {
-    <MudProgressCircular Indeterminate="true" />
+    <div class="d-flex justify-center pa-12">
+        <MudProgressCircular Indeterminate="true" />
+    </div>
 }
 else
 {
     <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-1">
-        <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" OnClick="GoBack" />
-        <MudText Typo="Typo.h5">@string.Format(L["Word.New"].Value, _partnership.Partner.DisplayName)</MudText>
+        <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" OnClick="GoBack" Class="sb-hoverable" />
+        <div class="dashboard-hero" style="padding: 0;">
+            <h1 style="font-size: 1.5rem;">@string.Format(L["Word.New"].Value, _partnership.Partner.DisplayName) <span aria-hidden="true">✨</span></h1>
+        </div>
     </MudStack>
-    <MudText Typo="Typo.caption" Color="Color.Tertiary" Class="mb-4">
+    <div class="hero-subtitle mb-4" style="padding-left: 0.25rem;">
         @string.Format(L["Word.NewSubtext"].Value, _myLanguage.ToUpper(), _partnership.Partner.NativeLanguage.ToUpper())
-    </MudText>
+    </div>
 
-    <MudPaper Class="pa-4" Elevation="0" Outlined="true">
+    <MudPaper Class="word-form" Elevation="0">
         <MudTextField @bind-Value="_term" Label="@($"{L["Word.TermLabel"]} ({_myLanguage.ToUpper()})")" Variant="Variant.Outlined" Required="true" Class="mb-3" />
         <MudTextField @bind-Value="_translation" Label="@($"{L["Word.TranslationLabel"]} ({_partnership.Partner.NativeLanguage.ToUpper()})")" Variant="Variant.Outlined" Required="true" Class="mb-3" />
         <MudTextField @bind-Value="_example" Label="@L["Word.ExampleLabel"]" Variant="Variant.Outlined" Class="mb-3" />
         <MudTextField @bind-Value="_notes" Label="@L["Word.NotesLabel"]" Variant="Variant.Outlined" Lines="2" Class="mb-3" />
         <MudTextField @bind-Value="_tagsInput" Label="@L["Word.TagsLabel"]" Variant="Variant.Outlined" Class="mb-3" />
 
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Save" Disabled="@_saving">
-            @L["Common.Save"]
-        </MudButton>
+        <div class="word-form-actions">
+            <MudButton Variant="Variant.Filled" OnClick="Save" Disabled="@_saving" Class="word-form-save sb-btn">
+                @L["Common.Save"]
+            </MudButton>
+        </div>
     </MudPaper>
 }
 

@@ -1,0 +1,78 @@
+@implements IDisposable
+@inject CelebrationBus Bus
+@inject IJSRuntime JS
+
+@if (_payload is not null)
+{
+    <div class="celebration-overlay @(_visible ? "is-visible" : "")"
+         @onclick="Dismiss"
+         role="status"
+         aria-live="polite">
+        <div class="celebration-card sb-card">
+            <div class="celebration-emoji">@_payload.Emoji</div>
+            <div class="celebration-title">@_payload.Title</div>
+            @if (!string.IsNullOrWhiteSpace(_payload.Subtitle))
+            {
+                <div class="celebration-sub">@_payload.Subtitle</div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private CelebrationPayload? _payload;
+    private bool _visible;
+    private CancellationTokenSource? _cts;
+
+    protected override void OnInitialized()
+    {
+        Bus.OnCelebrate += Show;
+    }
+
+    private async Task Show(CelebrationPayload payload)
+    {
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+
+        _payload = payload;
+        _visible = false;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            await Task.Delay(20, token);
+            _visible = true;
+            await InvokeAsync(StateHasChanged);
+
+            try { await JS.InvokeVoidAsync("studyBuddiesConfetti.burst", 64); } catch { }
+            try { await JS.InvokeVoidAsync("studyBuddiesSound.success"); }       catch { }
+
+            await Task.Delay(2400, token);
+            await DismissInternal();
+        }
+        catch (TaskCanceledException) { }
+    }
+
+    private async Task Dismiss()
+    {
+        _cts?.Cancel();
+        await DismissInternal();
+    }
+
+    private async Task DismissInternal()
+    {
+        _visible = false;
+        await InvokeAsync(StateHasChanged);
+        try { await Task.Delay(240); } catch { }
+        _payload = null;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Bus.OnCelebrate -= Show;
+        _cts?.Cancel();
+        _cts?.Dispose();
+    }
+}
