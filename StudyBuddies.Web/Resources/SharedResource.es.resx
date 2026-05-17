@@ -172,7 +172,9 @@
   <data name="Word.TranslationLabel" xml:space="preserve"><value>Traducción</value></data>
   <data name="Word.ExampleLabel" xml:space="preserve"><value>Frase de ejemplo</value></data>
   <data name="Word.NotesLabel" xml:space="preserve"><value>Notas (género, conjugación)</value></data>
-  <data name="Word.TagsLabel" xml:space="preserve"><value>Tags (separados por coma)</value></data>
+  <data name="Word.TagsLabel" xml:space="preserve"><value>Categorías / Etiquetas</value></data>
+  <data name="Word.TagsPlaceholder" xml:space="preserve"><value>Añadir o elegir una etiqueta</value></data>
+  <data name="Word.TagsSuggestions" xml:space="preserve"><value>Sugerencias</value></data>
   <data name="Word.AddNew" xml:space="preserve"><value>Palabra</value></data>
   <data name="Word.IAmLearning" xml:space="preserve"><value>Yo aprendo ({0})</value></data>
   <data name="Word.IAuthored" xml:space="preserve"><value>Creadas por mí ({0})</value></data>
@@ -216,6 +218,11 @@
   <data name="Study.Mode.MultipleChoice" xml:space="preserve"><value>Quiz</value></data>
   <data name="Study.Mode.Listening" xml:space="preserve"><value>Escuchar</value></data>
   <data name="Study.Mode.Cloze" xml:space="preserve"><value>Hueco</value></data>
+  <data name="Study.ModeFilter.Title" xml:space="preserve"><value>Tipos de ejercicio</value></data>
+  <data name="Study.ModeFilter.NoneSelected" xml:space="preserve"><value>Ningún tipo seleccionado. Activa al menos uno.</value></data>
+  <data name="Study.TagFilter.Title" xml:space="preserve"><value>Categorías</value></data>
+  <data name="Study.TagFilter.AllTags" xml:space="preserve"><value>Todas las categorías (sin filtro)</value></data>
+  <data name="Study.TagFilter.NoTags" xml:space="preserve"><value>Aún no hay categorías en este emparejamiento. Añade etiquetas a tus palabras.</value></data>
   <data name="Study.Type.Placeholder" xml:space="preserve"><value>Tu respuesta …</value></data>
   <data name="Study.Type.Check" xml:space="preserve"><value>Comprobar</value></data>
   <data name="Study.Type.Correct" xml:space="preserve"><value>¡Correcto!</value></data>

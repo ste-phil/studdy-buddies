@@ -1,0 +1,162 @@
+@inject IStringLocalizer<SharedResource> L
+
+<div class="tag-selector mb-3">
+    @if (!string.IsNullOrEmpty(Label))
+    {
+        <MudText Typo="Typo.caption" Color="Color.Tertiary" Class="d-block mb-1">@Label</MudText>
+    }
+
+    @if (Selected.Count > 0)
+    {
+        <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="1" Class="mb-2">
+            @foreach (var tag in Selected)
+            {
+                <MudChip T="string"
+                         Color="Color.Primary"
+                         Variant="Variant.Filled"
+                         Size="Size.Small"
+                         OnClose="@(() => RemoveTag(tag))"
+                         Disabled="@ReadOnly">
+                    @tag
+                </MudChip>
+            }
+        </MudStack>
+    }
+
+    @if (!ReadOnly)
+    {
+        <MudAutocomplete T="string"
+                         @ref="_autocomplete"
+                         Value="@_typing"
+                         ValueChanged="OnAutocompleteValueChanged"
+                         SearchFunc="@SearchTags"
+                         CoerceValue="true"
+                         CoerceText="false"
+                         ResetValueOnEmptyText="true"
+                         Clearable="true"
+                         OpenOnFocus="true"
+                         Variant="Variant.Outlined"
+                         Margin="Margin.Dense"
+                         Placeholder="@L["Word.TagsPlaceholder"]"
+                         AdornmentIcon="@Icons.Material.Filled.Add"
+                         Adornment="Adornment.End"
+                         OnAdornmentClick="OnAdornmentClicked" />
+
+        var suggestionChips = GetSuggestionChips();
+        @if (suggestionChips.Count > 0)
+        {
+            <MudText Typo="Typo.caption" Color="Color.Tertiary" Class="d-block mt-2">
+                @L["Word.TagsSuggestions"]
+            </MudText>
+            <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="1" Class="mt-1">
+                @foreach (var s in suggestionChips)
+                {
+                    <MudChip T="string"
+                             Color="Color.Default"
+                             Variant="Variant.Outlined"
+                             Size="Size.Small"
+                             OnClick="@(() => AddTag(s))">
+                        + @s
+                    </MudChip>
+                }
+            </MudStack>
+        }
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public List<string> Selected { get; set; } = new();
+
+    [Parameter] public EventCallback<List<string>> SelectedChanged { get; set; }
+
+    [Parameter] public IEnumerable<string> Suggestions { get; set; } = Array.Empty<string>();
+
+    [Parameter] public string? Label { get; set; }
+
+    [Parameter] public bool ReadOnly { get; set; }
+
+    [Parameter] public int MaxSuggestionChips { get; set; } = 10;
+
+    private MudAutocomplete<string>? _autocomplete;
+    private string? _typing;
+
+    private List<string> GetSuggestionChips()
+    {
+        return Suggestions
+            .Where(s => !Selected.Contains(s, StringComparer.OrdinalIgnoreCase))
+            .Take(MaxSuggestionChips)
+            .ToList();
+    }
+
+    private Task<IEnumerable<string>> SearchTags(string value, CancellationToken ct)
+    {
+        var query = (value ?? "").Trim();
+        var pool = Suggestions
+            .Where(s => !Selected.Contains(s, StringComparer.OrdinalIgnoreCase))
+            .Where(s => query.Length == 0 || s.Contains(query, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)
+            .Take(20);
+        return Task.FromResult<IEnumerable<string>>(pool);
+    }
+
+    private async Task OnAutocompleteValueChanged(string? value)
+    {
+        _typing = value;
+        var trimmed = value?.Trim();
+        if (string.IsNullOrEmpty(trimmed))
+        {
+            return;
+        }
+
+        await AddTag(trimmed);
+        await ResetInputAsync();
+    }
+
+    private async Task OnAdornmentClicked()
+    {
+        var trimmed = _typing?.Trim();
+        if (string.IsNullOrEmpty(trimmed))
+        {
+            return;
+        }
+
+        await AddTag(trimmed);
+        await ResetInputAsync();
+    }
+
+    private async Task AddTag(string tag)
+    {
+        var trimmed = tag.Trim();
+        if (string.IsNullOrEmpty(trimmed))
+        {
+            return;
+        }
+
+        if (Selected.Contains(trimmed, StringComparer.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        Selected.Add(trimmed);
+        await SelectedChanged.InvokeAsync(Selected);
+    }
+
+    private async Task RemoveTag(string tag)
+    {
+        var idx = Selected.FindIndex(t => string.Equals(t, tag, StringComparison.OrdinalIgnoreCase));
+        if (idx >= 0)
+        {
+            Selected.RemoveAt(idx);
+            await SelectedChanged.InvokeAsync(Selected);
+        }
+    }
+
+    private async Task ResetInputAsync()
+    {
+        _typing = null;
+        if (_autocomplete is not null)
+        {
+            await _autocomplete.ClearAsync();
+        }
+    }
+}

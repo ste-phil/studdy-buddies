@@ -175,6 +175,34 @@ window.studyBuddiesPrefs = (function () {
                 s.setItem(badgesKey, JSON.stringify(list));
                 return true;
             } catch (e) { return false; }
+        },
+        getStudyModes: function () {
+            const s = safeStorage(); if (!s) return null;
+            try {
+                const raw = s.getItem('sb.studyModes');
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : null;
+            } catch (e) { return null; }
+        },
+        setStudyModes: function (modes) {
+            const s = safeStorage(); if (!s) return;
+            try { s.setItem('sb.studyModes', JSON.stringify(modes || [])); }
+            catch (e) { console.error('Failed to persist study modes', e); }
+        },
+        getStudyTags: function (partnershipId) {
+            const s = safeStorage(); if (!s) return null;
+            try {
+                const raw = s.getItem('sb.studyTags.' + partnershipId);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : null;
+            } catch (e) { return null; }
+        },
+        setStudyTags: function (partnershipId, tags) {
+            const s = safeStorage(); if (!s) return;
+            try { s.setItem('sb.studyTags.' + partnershipId, JSON.stringify(tags || [])); }
+            catch (e) { console.error('Failed to persist study tags', e); }
         }
     };
 })();

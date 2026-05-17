@@ -1022,6 +1022,28 @@ h1:focus {
     .sb-progress .mud-progress-linear-bar::after { animation: none; }
 }
 
+/* Study filter card */
+.study-filter-card {
+    background: var(--sb-glass-bg) !important;
+    border: 1px solid var(--sb-glass-border) !important;
+    border-radius: var(--sb-radius-lg) !important;
+}
+
+.study-filter-card .mud-chip.mud-chip-filled.mud-theme-primary {
+    background: linear-gradient(135deg, var(--sb-color-primary) 0%, #F4A496 100%) !important;
+    color: #fff !important;
+}
+
+.study-filter-card .mud-chip.mud-chip-filled.mud-theme-secondary {
+    background: linear-gradient(135deg, var(--sb-color-secondary) 0%, #C8B8F0 100%) !important;
+    color: #fff !important;
+}
+
+.study-filter-card .mud-chip {
+    border-radius: var(--sb-radius-pill);
+    font-weight: 700;
+}
+
 /* ===== MyWords + WordNew (Phase 7) ===== */
 .words-search {
     padding: 0.5rem 0.6rem;

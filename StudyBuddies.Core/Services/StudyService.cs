@@ -7,22 +7,25 @@ public class StudyService(ApplicationDbContext db) : IStudyService
 {
     public const int DailyGoal = 10;
 
-    public async Task<List<StudyCard>> GetDueCardsAsync(Guid partnershipId, string learnerUserId, int max = 20, int newPerDay = 10, CancellationToken ct = default)
+    public async Task<List<StudyCard>> GetDueCardsAsync(Guid partnershipId, string learnerUserId, int max = 20, int newPerDay = 10, IReadOnlySet<StudyMode>? allowedModes = null, IReadOnlySet<string>? tagFilter = null, CancellationToken ct = default)
     {
         await EnsureMemberAsync(partnershipId, learnerUserId, ct);
 
         var today = DateTime.UtcNow.Date;
+        var hasTagFilter = tagFilter is { Count: > 0 };
 
-        var dueWords = await db.Words
+        var dueQuery = db.Words
             .AsNoTracking()
             .Where(w => w.PartnershipId == partnershipId
                 && w.ForUserId == learnerUserId
                 && w.Review != null
                 && w.Review.DueDate <= today.AddDays(1))
             .Include(w => w.Review)
-            .OrderBy(w => w.Review!.DueDate)
-            .Take(max)
-            .ToListAsync(ct);
+            .OrderBy(w => w.Review!.DueDate);
+
+        var dueWords = hasTagFilter
+            ? FilterByTags(await dueQuery.ToListAsync(ct), tagFilter!).Take(max).ToList()
+            : await dueQuery.Take(max).ToListAsync(ct);
 
         var newSlots = Math.Max(0, max - dueWords.Count);
         if (newSlots > 0)
@@ -30,53 +33,78 @@ public class StudyService(ApplicationDbContext db) : IStudyService
             newSlots = Math.Min(newSlots, newPerDay);
         }
 
-        var newWords = newSlots > 0
-            ? await db.Words
+        List<Word> newWords;
+        if (newSlots > 0)
+        {
+            var newQuery = db.Words
                 .AsNoTracking()
                 .Where(w => w.PartnershipId == partnershipId
                     && w.ForUserId == learnerUserId
                     && w.Review == null)
-                .OrderBy(w => w.CreatedAt)
-                .Take(newSlots)
-                .ToListAsync(ct)
-            : new List<Word>();
+                .OrderBy(w => w.CreatedAt);
+
+            newWords = hasTagFilter
+                ? FilterByTags(await newQuery.ToListAsync(ct), tagFilter!).Take(newSlots).ToList()
+                : await newQuery.Take(newSlots).ToListAsync(ct);
+        }
+        else
+        {
+            newWords = new List<Word>();
+        }
 
         var allCards = dueWords.Concat(newWords).ToList();
 
-        return await BuildCardsAsync(allCards, partnershipId, learnerUserId, ct);
+        return await BuildCardsAsync(allCards, partnershipId, learnerUserId, allowedModes, ct);
     }
 
-    public async Task<List<StudyCard>> GetExtraPracticeCardsAsync(Guid partnershipId, string learnerUserId, int max = 20, CancellationToken ct = default)
+    public async Task<List<StudyCard>> GetExtraPracticeCardsAsync(Guid partnershipId, string learnerUserId, int max = 20, IReadOnlySet<StudyMode>? allowedModes = null, IReadOnlySet<string>? tagFilter = null, CancellationToken ct = default)
     {
         await EnsureMemberAsync(partnershipId, learnerUserId, ct);
+        var hasTagFilter = tagFilter is { Count: > 0 };
 
-        var newWords = await db.Words
+        var newQuery = db.Words
             .AsNoTracking()
             .Where(w => w.PartnershipId == partnershipId
                 && w.ForUserId == learnerUserId
                 && w.Review == null)
-            .OrderBy(w => w.CreatedAt)
-            .Take(max)
-            .ToListAsync(ct);
+            .OrderBy(w => w.CreatedAt);
+
+        var newWords = hasTagFilter
+            ? FilterByTags(await newQuery.ToListAsync(ct), tagFilter!).Take(max).ToList()
+            : await newQuery.Take(max).ToListAsync(ct);
 
         var remaining = Math.Max(0, max - newWords.Count);
-        var reviewedWords = remaining > 0
-            ? await db.Words
+        List<Word> reviewedWords;
+        if (remaining > 0)
+        {
+            var reviewedQuery = db.Words
                 .AsNoTracking()
                 .Where(w => w.PartnershipId == partnershipId
                     && w.ForUserId == learnerUserId
                     && w.Review != null)
                 .Include(w => w.Review)
-                .OrderBy(w => w.Review!.DueDate)
-                .Take(remaining)
-                .ToListAsync(ct)
-            : new List<Word>();
+                .OrderBy(w => w.Review!.DueDate);
+
+            reviewedWords = hasTagFilter
+                ? FilterByTags(await reviewedQuery.ToListAsync(ct), tagFilter!).Take(remaining).ToList()
+                : await reviewedQuery.Take(remaining).ToListAsync(ct);
+        }
+        else
+        {
+            reviewedWords = new List<Word>();
+        }
 
         var allWords = newWords.Concat(reviewedWords).ToList();
-        return await BuildCardsAsync(allWords, partnershipId, learnerUserId, ct);
+        return await BuildCardsAsync(allWords, partnershipId, learnerUserId, allowedModes, ct);
     }
 
-    private async Task<List<StudyCard>> BuildCardsAsync(List<Word> words, Guid partnershipId, string learnerUserId, CancellationToken ct)
+    // tagFilter is expected to use a case-insensitive comparer (HashSet<string>(StringComparer.OrdinalIgnoreCase)).
+    private static IEnumerable<Word> FilterByTags(IEnumerable<Word> words, IReadOnlySet<string> tagFilter)
+    {
+        return words.Where(w => w.Tags.Any(t => tagFilter.Contains(t)));
+    }
+
+    private async Task<List<StudyCard>> BuildCardsAsync(List<Word> words, Guid partnershipId, string learnerUserId, IReadOnlySet<StudyMode>? allowedModes, CancellationToken ct)
     {
         if (words.Count == 0)
         {
@@ -95,7 +123,7 @@ public class StudyService(ApplicationDbContext db) : IStudyService
         return words.Select(w =>
         {
             var forwardDistractorCount = translationPool.Count(t => t != w.Translation);
-            var mode = StudyModeSelector.Pick(w, w.Review, forwardDistractorCount);
+            var mode = StudyModeSelector.Pick(w, w.Review, forwardDistractorCount, allowedModes);
 
             // Cloze stays forward (Example is in TermLanguage). Other modes flip 50/50.
             var reversed = mode != StudyMode.Cloze && rng.Next(2) == 0;
