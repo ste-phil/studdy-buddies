@@ -31,7 +31,10 @@ else
         <MudTextField @bind-Value="_translation" Label="@($"{L["Word.TranslationLabel"]} ({_partnership.Partner.NativeLanguage.ToUpper()})")" Variant="Variant.Outlined" Required="true" Class="mb-3" />
         <MudTextField @bind-Value="_example" Label="@L["Word.ExampleLabel"]" Variant="Variant.Outlined" Class="mb-3" />
         <MudTextField @bind-Value="_notes" Label="@L["Word.NotesLabel"]" Variant="Variant.Outlined" Lines="2" Class="mb-3" />
-        <MudTextField @bind-Value="_tagsInput" Label="@L["Word.TagsLabel"]" Variant="Variant.Outlined" Class="mb-3" />
+        <TagSelector Selected="_tags"
+                     SelectedChanged="OnTagsChanged"
+                     Suggestions="_suggestedTags"
+                     Label="@L["Word.TagsLabel"]" />
 
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Save" Disabled="@_saving">
             @L["Common.Save"]
@@ -50,7 +53,8 @@ else
     private string _translation = "";
     private string _example = "";
     private string _notes = "";
-    private string _tagsInput = "";
+    private List<string> _tags = new();
+    private List<string> _suggestedTags = new();
     private bool _saving;
 
     protected override async Task OnInitializedAsync()
@@ -62,6 +66,20 @@ else
         _partnership = await PartnershipService.GetPartnershipAsync(PartnershipId, _userId);
         var me = await UserManager.GetUserAsync(auth.User);
         _myLanguage = me?.NativeLanguage ?? "";
+
+        try
+        {
+            _suggestedTags = await WordService.GetExistingTagsAsync(PartnershipId, _userId);
+        }
+        catch
+        {
+            _suggestedTags = new List<string>();
+        }
+    }
+
+    private void OnTagsChanged(List<string> tags)
+    {
+        _tags = tags;
     }
 
     private async Task Save()
@@ -70,17 +88,11 @@ else
         _saving = true;
         try
         {
-            var tags = _tagsInput
-                .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(t => t.Trim())
-                .Where(t => !string.IsNullOrEmpty(t))
-                .ToList();
-
             await WordService.CreateWordAsync(PartnershipId, _userId,
                 new WordCreateInput(_term, _translation,
                     string.IsNullOrWhiteSpace(_example) ? null : _example,
                     string.IsNullOrWhiteSpace(_notes) ? null : _notes,
-                    tags));
+                    _tags));
 
             Snackbar.Add(L["Word.Saved"].Value, Severity.Success);
             await JS.InvokeVoidAsync("history.back");

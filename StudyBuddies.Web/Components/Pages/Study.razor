@@ -3,6 +3,7 @@
 @rendermode InteractiveServer
 
 @inject IStudyService StudyService
+@inject IWordService WordService
 @inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> UserManager
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IJSRuntime JS
@@ -53,6 +54,38 @@
                     <MudText Typo="Typo.caption" Color="Color.Warning" Class="mt-2 d-block">
                         @L["Study.ModeFilter.NoneSelected"]
                     </MudText>
+                }
+
+                <MudDivider Class="my-3" />
+
+                <MudText Typo="Typo.subtitle2" Class="mb-2">@L["Study.TagFilter.Title"]</MudText>
+                @if (_availableTags.Count == 0)
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Tertiary" Class="d-block">
+                        @L["Study.TagFilter.NoTags"]
+                    </MudText>
+                }
+                else
+                {
+                    <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="2">
+                        @foreach (var tag in _availableTags)
+                        {
+                            var tagSelected = _selectedTags.Contains(tag);
+                            <MudChip T="string"
+                                     Value="@tag"
+                                     Variant="@(tagSelected ? Variant.Filled : Variant.Outlined)"
+                                     Color="@(tagSelected ? Color.Secondary : Color.Default)"
+                                     OnClick="@(() => ToggleTag(tag))">
+                                @tag
+                            </MudChip>
+                        }
+                    </MudStack>
+                    @if (_selectedTags.Count == 0)
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Tertiary" Class="mt-2 d-block">
+                            @L["Study.TagFilter.AllTags"]
+                        </MudText>
+                    }
                 }
             </MudPaper>
         }
@@ -117,6 +150,8 @@
     private int _total;
     private int _done;
     private HashSet<StudyMode> _allowedModes = new(_allModes);
+    private List<string> _availableTags = new();
+    private HashSet<string> _selectedTags = new(StringComparer.OrdinalIgnoreCase);
 
     protected override async Task OnInitializedAsync()
     {
@@ -146,6 +181,35 @@
         {
         }
 
+        try
+        {
+            _availableTags = await WordService.GetExistingTagsAsync(PartnershipId, _userId);
+        }
+        catch
+        {
+            _availableTags = new List<string>();
+        }
+
+        try
+        {
+            var savedTags = await JS.InvokeAsync<string[]?>("studyBuddiesPrefs.getStudyTags", PartnershipId);
+            if (savedTags is { Length: > 0 })
+            {
+                var tagSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var t in savedTags)
+                {
+                    if (_availableTags.Contains(t, StringComparer.OrdinalIgnoreCase))
+                    {
+                        tagSet.Add(t);
+                    }
+                }
+                _selectedTags = tagSet;
+            }
+        }
+        catch
+        {
+        }
+
         await ReloadCardsAsync();
     }
 
@@ -166,10 +230,11 @@
             return;
         }
 
-        var cards = await StudyService.GetDueCardsAsync(PartnershipId, _userId, allowedModes: _allowedModes);
+        IReadOnlySet<string>? tagFilter = _selectedTags.Count > 0 ? _selectedTags : null;
+        var cards = await StudyService.GetDueCardsAsync(PartnershipId, _userId, allowedModes: _allowedModes, tagFilter: tagFilter);
         if (cards.Count == 0)
         {
-            cards = await StudyService.GetExtraPracticeCardsAsync(PartnershipId, _userId, allowedModes: _allowedModes);
+            cards = await StudyService.GetExtraPracticeCardsAsync(PartnershipId, _userId, allowedModes: _allowedModes, tagFilter: tagFilter);
         }
         _queue = new Queue<StudyCard>(cards);
         _total = _queue.Count;
@@ -213,6 +278,27 @@
             await JS.InvokeVoidAsync(
                 "studyBuddiesPrefs.setStudyModes",
                 (object)_allowedModes.Select(m => m.ToString()).ToArray());
+        }
+        catch
+        {
+        }
+
+        await ReloadCardsAsync();
+    }
+
+    private async Task ToggleTag(string tag)
+    {
+        if (!_selectedTags.Add(tag))
+        {
+            _selectedTags.Remove(tag);
+        }
+
+        try
+        {
+            await JS.InvokeVoidAsync(
+                "studyBuddiesPrefs.setStudyTags",
+                PartnershipId,
+                (object)_selectedTags.ToArray());
         }
         catch
         {

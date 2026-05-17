@@ -155,7 +155,9 @@
   <data name="Word.TranslationLabel" xml:space="preserve"><value>Übersetzung</value></data>
   <data name="Word.ExampleLabel" xml:space="preserve"><value>Beispielsatz</value></data>
   <data name="Word.NotesLabel" xml:space="preserve"><value>Notizen (Genus, Konjugation)</value></data>
-  <data name="Word.TagsLabel" xml:space="preserve"><value>Tags (Komma-getrennt)</value></data>
+  <data name="Word.TagsLabel" xml:space="preserve"><value>Kategorien / Tags</value></data>
+  <data name="Word.TagsPlaceholder" xml:space="preserve"><value>Tag hinzufügen oder auswählen</value></data>
+  <data name="Word.TagsSuggestions" xml:space="preserve"><value>Vorschläge</value></data>
   <data name="Word.AddNew" xml:space="preserve"><value>Wort</value></data>
   <data name="Word.IAmLearning" xml:space="preserve"><value>Ich lerne ({0})</value></data>
   <data name="Word.IAuthored" xml:space="preserve"><value>Erstellt von mir ({0})</value></data>
@@ -199,6 +201,9 @@
   <data name="Study.Mode.Cloze" xml:space="preserve"><value>Lückentext</value></data>
   <data name="Study.ModeFilter.Title" xml:space="preserve"><value>Übungstypen</value></data>
   <data name="Study.ModeFilter.NoneSelected" xml:space="preserve"><value>Kein Übungstyp ausgewählt. Bitte mindestens einen aktivieren.</value></data>
+  <data name="Study.TagFilter.Title" xml:space="preserve"><value>Kategorien</value></data>
+  <data name="Study.TagFilter.AllTags" xml:space="preserve"><value>Alle Kategorien (kein Filter)</value></data>
+  <data name="Study.TagFilter.NoTags" xml:space="preserve"><value>Noch keine Kategorien in dieser Partnerschaft. Füge Tags zu deinen Wörtern hinzu.</value></data>
   <data name="Study.Type.Placeholder" xml:space="preserve"><value>Deine Antwort …</value></data>
   <data name="Study.Type.Check" xml:space="preserve"><value>Prüfen</value></data>
   <data name="Study.Type.Correct" xml:space="preserve"><value>Richtig!</value></data>

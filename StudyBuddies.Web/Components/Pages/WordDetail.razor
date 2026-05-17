@@ -27,7 +27,11 @@ else
         <MudTextField @bind-Value="_translation" Label="@L["Word.TranslationLabel"]" Variant="Variant.Outlined" ReadOnly="!_word.IsAuthoredByMe" Class="mb-3" />
         <MudTextField @bind-Value="_example" Label="@L["Word.ExampleLabel"]" Variant="Variant.Outlined" ReadOnly="!_word.IsAuthoredByMe" Class="mb-3" />
         <MudTextField @bind-Value="_notes" Label="@L["Word.NotesLabel"]" Variant="Variant.Outlined" Lines="2" ReadOnly="!_word.IsAuthoredByMe" Class="mb-3" />
-        <MudTextField @bind-Value="_tagsInput" Label="@L["Word.TagsLabel"]" Variant="Variant.Outlined" ReadOnly="!_word.IsAuthoredByMe" Class="mb-3" />
+        <TagSelector Selected="_tags"
+                     SelectedChanged="OnTagsChanged"
+                     Suggestions="_suggestedTags"
+                     Label="@L["Word.TagsLabel"]"
+                     ReadOnly="!_word.IsAuthoredByMe" />
 
         @if (_word.IsAuthoredByMe)
         {
@@ -56,7 +60,8 @@ else
     private string _translation = "";
     private string _example = "";
     private string _notes = "";
-    private string _tagsInput = "";
+    private List<string> _tags = new();
+    private List<string> _suggestedTags = new();
     private bool _saving;
 
     protected override async Task OnInitializedAsync()
@@ -72,8 +77,22 @@ else
             _translation = _word.Translation;
             _example = _word.Example ?? "";
             _notes = _word.Notes ?? "";
-            _tagsInput = string.Join(", ", _word.Tags);
+            _tags = _word.Tags.ToList();
+
+            try
+            {
+                _suggestedTags = await WordService.GetExistingTagsAsync(_word.PartnershipId, _userId);
+            }
+            catch
+            {
+                _suggestedTags = new List<string>();
+            }
         }
+    }
+
+    private void OnTagsChanged(List<string> tags)
+    {
+        _tags = tags;
     }
 
     private async Task Save()
@@ -82,17 +101,11 @@ else
         _saving = true;
         try
         {
-            var tags = _tagsInput
-                .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(t => t.Trim())
-                .Where(t => !string.IsNullOrEmpty(t))
-                .ToList();
-
             await WordService.UpdateWordAsync(WordId, _userId,
                 new WordCreateInput(_term, _translation,
                     string.IsNullOrWhiteSpace(_example) ? null : _example,
                     string.IsNullOrWhiteSpace(_notes) ? null : _notes,
-                    tags));
+                    _tags));
 
             Snackbar.Add(L["Word.Saved"].Value, Severity.Success);
             _word = await WordService.GetWordAsync(WordId, _userId);

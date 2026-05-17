@@ -12,144 +12,186 @@ internal static class DevSeeder
     private static readonly DevUser Philipp = new("philipp@dev.local", "Philipp", "de");
     private static readonly DevUser Hannah = new("hannah@dev.local", "Hannah", "de");
 
+    // Tag-Konvention: Kategorien-Tags auf Deutsch (Tiere, Wohnen, ...) - einheitlich
+    // unabhaengig von der Sprachrichtung der Partnerschaft.
+
     // Authored by Melissa (es) for Philipp (learning es) -- partnership Melissa <-> Philipp
-    private static readonly (string Term, string Translation)[] WordsForPhilipp =
+    private static readonly SeedWord[] WordsForPhilipp =
     {
-        ("casa", "Haus"),
-        ("agua", "Wasser"),
-        ("amigo", "Freund"),
-        ("coche", "Auto"),
-        ("playa", "Strand"),
-        ("mesa", "Tisch"),
-        ("familia", "Familie"),
-        ("madre", "Mutter"),
-        ("padre", "Vater"),
-        ("hermano", "Bruder"),
-        ("hermana", "Schwester"),
-        ("mano", "Hand"),
-        ("ojo", "Auge"),
-        ("corazón", "Herz"),
-        ("cabeza", "Kopf"),
-        ("pie", "Fuß"),
-        ("hora", "Stunde"),
-        ("semana", "Woche"),
-        ("mes", "Monat"),
-        ("año", "Jahr"),
-        ("mañana", "Morgen"),
-        ("tarde", "Nachmittag"),
-        ("lluvia", "Regen"),
-        ("nieve", "Schnee"),
-        ("viento", "Wind"),
-        ("frío", "kalt"),
-        ("calor", "Hitze"),
-        ("correr", "laufen"),
-        ("comer", "essen"),
-        ("beber", "trinken")
+        new("casa", "Haus", "Wohnen"),
+        new("agua", "Wasser", "Essen"),
+        new("amigo", "Freund", "Familie"),
+        new("coche", "Auto", "Verkehr"),
+        new("playa", "Strand", "Orte", "Natur"),
+        new("mesa", "Tisch", "Wohnen"),
+        new("familia", "Familie", "Familie"),
+        new("madre", "Mutter", "Familie"),
+        new("padre", "Vater", "Familie"),
+        new("hermano", "Bruder", "Familie"),
+        new("hermana", "Schwester", "Familie"),
+        new("mano", "Hand", "Körper"),
+        new("ojo", "Auge", "Körper"),
+        new("corazón", "Herz", "Körper"),
+        new("cabeza", "Kopf", "Körper"),
+        new("pie", "Fuß", "Körper"),
+        new("hora", "Stunde", "Zeit"),
+        new("semana", "Woche", "Zeit"),
+        new("mes", "Monat", "Zeit"),
+        new("año", "Jahr", "Zeit"),
+        new("mañana", "Morgen", "Zeit"),
+        new("tarde", "Nachmittag", "Zeit"),
+        new("lluvia", "Regen", "Wetter"),
+        new("nieve", "Schnee", "Wetter"),
+        new("viento", "Wind", "Wetter"),
+        new("frío", "kalt", "Wetter", "Adjektive"),
+        new("calor", "Hitze", "Wetter"),
+        new("correr", "laufen", "Verben"),
+        new("comer", "essen", "Verben"),
+        new("beber", "trinken", "Verben"),
+        // Neue Woerter zur Auffuellung der Kategorien:
+        new("ventana", "Fenster", "Wohnen"),
+        new("puerta", "Tür", "Wohnen"),
+        new("cama", "Bett", "Wohnen"),
+        new("cocina", "Küche", "Wohnen"),
+        new("abuelo", "Großvater", "Familie"),
+        new("abuela", "Großmutter", "Familie"),
+        new("brazo", "Arm", "Körper"),
+        new("pierna", "Bein", "Körper"),
+        new("boca", "Mund", "Körper"),
+        new("ayer", "gestern", "Zeit"),
+        new("hoy", "heute", "Zeit"),
+        new("niebla", "Nebel", "Wetter"),
+        new("dormir", "schlafen", "Verben"),
+        new("hablar", "sprechen", "Verben"),
     };
 
     // Authored by Philipp (de) for Melissa (learning de) -- partnership Melissa <-> Philipp
-    private static readonly (string Term, string Translation)[] WordsForMelissaFromPhilipp =
+    private static readonly SeedWord[] WordsForMelissaFromPhilipp =
     {
-        ("Hund", "perro"),
-        ("Apfel", "manzana"),
-        ("Buch", "libro"),
-        ("Stuhl", "silla"),
-        ("Tag", "día"),
-        ("Nacht", "noche"),
-        ("Vogel", "pájaro"),
-        ("Pferd", "caballo"),
-        ("Fisch", "pez"),
-        ("Maus", "ratón"),
-        ("Milch", "leche"),
-        ("Käse", "queso"),
-        ("Fleisch", "carne"),
-        ("Reis", "arroz"),
-        ("Zug", "tren"),
-        ("Fahrrad", "bicicleta"),
-        ("Schule", "escuela"),
-        ("Lehrer", "profesor"),
-        ("Schüler", "alumno"),
-        ("Liebe", "amor"),
-        ("Glück", "suerte"),
-        ("Zeit", "tiempo"),
-        ("Geld", "dinero"),
-        ("Arbeit", "trabajo"),
-        ("Garten", "jardín"),
-        ("Blume", "flor"),
-        ("Baum", "árbol"),
-        ("Berg", "montaña"),
-        ("Fluss", "río"),
-        ("Meer", "mar")
+        new("Hund", "perro", "Tiere"),
+        new("Apfel", "manzana", "Essen"),
+        new("Buch", "libro", "Schule"),
+        new("Stuhl", "silla", "Wohnen"),
+        new("Tag", "día", "Zeit"),
+        new("Nacht", "noche", "Zeit"),
+        new("Vogel", "pájaro", "Tiere"),
+        new("Pferd", "caballo", "Tiere"),
+        new("Fisch", "pez", "Tiere"),
+        new("Maus", "ratón", "Tiere"),
+        new("Milch", "leche", "Essen"),
+        new("Käse", "queso", "Essen"),
+        new("Fleisch", "carne", "Essen"),
+        new("Reis", "arroz", "Essen"),
+        new("Zug", "tren", "Verkehr"),
+        new("Fahrrad", "bicicleta", "Verkehr"),
+        new("Schule", "escuela", "Schule", "Orte"),
+        new("Lehrer", "profesor", "Schule"),
+        new("Schüler", "alumno", "Schule"),
+        new("Liebe", "amor", "Konzepte"),
+        new("Glück", "suerte", "Konzepte"),
+        new("Zeit", "tiempo", "Konzepte", "Zeit"),
+        new("Geld", "dinero", "Konzepte"),
+        new("Arbeit", "trabajo", "Konzepte"),
+        new("Garten", "jardín", "Wohnen", "Natur"),
+        new("Blume", "flor", "Natur"),
+        new("Baum", "árbol", "Natur"),
+        new("Berg", "montaña", "Natur", "Orte"),
+        new("Fluss", "río", "Natur"),
+        new("Meer", "mar", "Natur", "Orte"),
+        // Neue Woerter:
+        new("Schlange", "serpiente", "Tiere"),
+        new("Wolf", "lobo", "Tiere"),
+        new("Bär", "oso", "Tiere"),
+        new("Kuh", "vaca", "Tiere"),
+        new("Ei", "huevo", "Essen"),
+        new("Suppe", "sopa", "Essen"),
+        new("Flugzeug", "avión", "Verkehr"),
+        new("Bus", "autobús", "Verkehr"),
     };
 
     // Authored by Hannah (de) for Melissa (learning de) -- partnership Melissa <-> Hannah
-    private static readonly (string Term, string Translation)[] WordsForMelissaFromHannah =
+    private static readonly SeedWord[] WordsForMelissaFromHannah =
     {
-        ("Katze", "gato"),
-        ("Brot", "pan"),
-        ("Sonne", "sol"),
-        ("Kind", "niño"),
-        ("Frau", "mujer"),
-        ("Mann", "hombre"),
-        ("Junge", "chico"),
-        ("Mädchen", "chica"),
-        ("Stadt", "ciudad"),
-        ("Dorf", "pueblo"),
-        ("Land", "país"),
-        ("Welt", "mundo"),
-        ("Himmel", "cielo"),
-        ("Erde", "tierra"),
-        ("Stern", "estrella"),
-        ("Mond", "luna"),
-        ("Wolke", "nube"),
-        ("Sturm", "tormenta"),
-        ("Eis", "hielo"),
-        ("Feuer", "fuego"),
-        ("Licht", "luz"),
-        ("Farbe", "color"),
-        ("weiß", "blanco"),
-        ("grau", "gris"),
-        ("rosa", "rosa"),
-        ("groß", "grande"),
-        ("klein", "pequeño"),
-        ("neu", "nuevo"),
-        ("alt", "viejo"),
-        ("schön", "bonito")
+        new("Katze", "gato", "Tiere"),
+        new("Brot", "pan", "Essen"),
+        new("Sonne", "sol", "Wetter", "Natur"),
+        new("Kind", "niño", "Familie"),
+        new("Frau", "mujer", "Familie"),
+        new("Mann", "hombre", "Familie"),
+        new("Junge", "chico", "Familie"),
+        new("Mädchen", "chica", "Familie"),
+        new("Stadt", "ciudad", "Orte"),
+        new("Dorf", "pueblo", "Orte"),
+        new("Land", "país", "Orte"),
+        new("Welt", "mundo", "Orte"),
+        new("Himmel", "cielo", "Natur"),
+        new("Erde", "tierra", "Natur"),
+        new("Stern", "estrella", "Natur"),
+        new("Mond", "luna", "Natur"),
+        new("Wolke", "nube", "Wetter"),
+        new("Sturm", "tormenta", "Wetter"),
+        new("Eis", "hielo", "Wetter", "Konzepte"),
+        new("Feuer", "fuego", "Natur", "Konzepte"),
+        new("Licht", "luz", "Konzepte"),
+        new("Farbe", "color", "Farben", "Konzepte"),
+        new("weiß", "blanco", "Farben", "Adjektive"),
+        new("grau", "gris", "Farben", "Adjektive"),
+        new("rosa", "rosa", "Farben", "Adjektive"),
+        new("groß", "grande", "Adjektive"),
+        new("klein", "pequeño", "Adjektive"),
+        new("neu", "nuevo", "Adjektive"),
+        new("alt", "viejo", "Adjektive"),
+        new("schön", "bonito", "Adjektive"),
+        // Neue Woerter:
+        new("Sohn", "hijo", "Familie"),
+        new("Tochter", "hija", "Familie"),
+        new("Wald", "bosque", "Natur"),
+        new("See", "lago", "Natur"),
+        new("Insel", "isla", "Natur", "Orte"),
+        new("Stift", "lápiz", "Schule"),
+        new("Donner", "trueno", "Wetter"),
     };
 
     // Authored by Melissa (es) for Hannah (learning es) -- partnership Melissa <-> Hannah
-    private static readonly (string Term, string Translation)[] WordsForHannah =
+    private static readonly SeedWord[] WordsForHannah =
     {
-        ("verde", "grün"),
-        ("rojo", "rot"),
-        ("azul", "blau"),
-        ("amarillo", "gelb"),
-        ("negro", "schwarz"),
-        ("naranja", "orange"),
-        ("marrón", "braun"),
-        ("violeta", "lila"),
-        ("claro", "hell"),
-        ("oscuro", "dunkel"),
-        ("alto", "hoch"),
-        ("bajo", "niedrig"),
-        ("largo", "lang"),
-        ("corto", "kurz"),
-        ("ancho", "breit"),
-        ("estrecho", "schmal"),
-        ("rápido", "schnell"),
-        ("lento", "langsam"),
-        ("fácil", "einfach"),
-        ("difícil", "schwierig"),
-        ("fuerte", "stark"),
-        ("débil", "schwach"),
-        ("caliente", "heiß"),
-        ("dulce", "süß"),
-        ("salado", "salzig"),
-        ("amargo", "bitter"),
-        ("lleno", "voll"),
-        ("vacío", "leer"),
-        ("limpio", "sauber"),
-        ("sucio", "schmutzig")
+        new("verde", "grün", "Farben"),
+        new("rojo", "rot", "Farben"),
+        new("azul", "blau", "Farben"),
+        new("amarillo", "gelb", "Farben"),
+        new("negro", "schwarz", "Farben"),
+        new("naranja", "orange", "Farben"),
+        new("marrón", "braun", "Farben"),
+        new("violeta", "lila", "Farben"),
+        new("claro", "hell", "Farben", "Adjektive"),
+        new("oscuro", "dunkel", "Farben", "Adjektive"),
+        new("alto", "hoch", "Adjektive"),
+        new("bajo", "niedrig", "Adjektive"),
+        new("largo", "lang", "Adjektive"),
+        new("corto", "kurz", "Adjektive"),
+        new("ancho", "breit", "Adjektive"),
+        new("estrecho", "schmal", "Adjektive"),
+        new("rápido", "schnell", "Adjektive"),
+        new("lento", "langsam", "Adjektive"),
+        new("fácil", "einfach", "Adjektive"),
+        new("difícil", "schwierig", "Adjektive"),
+        new("fuerte", "stark", "Adjektive"),
+        new("débil", "schwach", "Adjektive"),
+        new("caliente", "heiß", "Adjektive", "Wetter"),
+        new("dulce", "süß", "Adjektive", "Essen"),
+        new("salado", "salzig", "Adjektive", "Essen"),
+        new("amargo", "bitter", "Adjektive", "Essen"),
+        new("lleno", "voll", "Adjektive"),
+        new("vacío", "leer", "Adjektive"),
+        new("limpio", "sauber", "Adjektive"),
+        new("sucio", "schmutzig", "Adjektive"),
+        // Neue Woerter:
+        new("dorado", "golden", "Farben", "Adjektive"),
+        new("plateado", "silbern", "Farben", "Adjektive"),
+        new("escribir", "schreiben", "Verben"),
+        new("leer", "lesen", "Verben"),
+        new("escuchar", "hören", "Verben"),
+        new("fruta", "Obst", "Essen"),
     };
 
     public static async Task SeedAsync(IServiceProvider services)
@@ -263,21 +305,30 @@ internal static class DevSeeder
         Partnership partnership,
         ApplicationUser byUser,
         ApplicationUser forUser,
-        (string Term, string Translation)[] words,
+        SeedWord[] words,
         ILogger logger)
     {
-        var existingTerms = await db.Words
+        var existingWords = await db.Words
             .Where(w => w.PartnershipId == partnership.Id && w.ByUserId == byUser.Id)
-            .Select(w => w.Term)
             .ToListAsync();
 
-        var existing = new HashSet<string>(existingTerms, StringComparer.Ordinal);
+        var existingByTerm = existingWords.ToDictionary(w => w.Term, StringComparer.Ordinal);
         var added = 0;
+        var tagsUpdated = 0;
 
-        foreach (var (term, translation) in words)
+        foreach (var seed in words)
         {
-            if (existing.Contains(term))
+            var tagList = seed.Tags.ToList();
+
+            if (existingByTerm.TryGetValue(seed.Term, out var existing))
             {
+                var oldSet = new HashSet<string>(existing.Tags, StringComparer.OrdinalIgnoreCase);
+                var newSet = new HashSet<string>(tagList, StringComparer.OrdinalIgnoreCase);
+                if (!oldSet.SetEquals(newSet))
+                {
+                    existing.Tags = tagList;
+                    tagsUpdated++;
+                }
                 continue;
             }
 
@@ -286,23 +337,26 @@ internal static class DevSeeder
                 PartnershipId = partnership.Id,
                 ByUserId = byUser.Id,
                 ForUserId = forUser.Id,
-                Term = term,
+                Term = seed.Term,
                 TermLanguage = byUser.NativeLanguage,
-                Translation = translation,
+                Translation = seed.Translation,
                 TranslationLanguage = forUser.NativeLanguage,
+                Tags = tagList,
                 CreatedAt = DateTime.UtcNow
             });
             added++;
         }
 
-        if (added > 0)
+        if (added > 0 || tagsUpdated > 0)
         {
             await db.SaveChangesAsync();
             logger.LogInformation(
-                "DevSeeder added {Count} words by {ByEmail} for {ForEmail}",
-                added, byUser.Email, forUser.Email);
+                "DevSeeder added {Added} word(s) and updated tags on {Updated} word(s) by {ByEmail} for {ForEmail}",
+                added, tagsUpdated, byUser.Email, forUser.Email);
         }
     }
 
     private record DevUser(string Email, string DisplayName, string NativeLanguage);
+
+    private sealed record SeedWord(string Term, string Translation, params string[] Tags);
 }

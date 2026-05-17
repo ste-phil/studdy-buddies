@@ -75,6 +75,23 @@ window.studyBuddiesPrefs = {
         } catch (e) {
             console.error('Failed to persist study modes', e);
         }
+    },
+    getStudyTags: function (partnershipId) {
+        try {
+            const raw = localStorage.getItem('sb.studyTags.' + partnershipId);
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : null;
+        } catch (e) {
+            return null;
+        }
+    },
+    setStudyTags: function (partnershipId, tags) {
+        try {
+            localStorage.setItem('sb.studyTags.' + partnershipId, JSON.stringify(tags || []));
+        } catch (e) {
+            console.error('Failed to persist study tags', e);
+        }
     }
 };
 
