@@ -24,7 +24,38 @@
                     @_done / @_total (@($"{(int)Math.Round(_total == 0 ? 0 : (_done * 100.0 / _total))}%"))
                 </MudText>
             }
+            <MudIconButton Icon="@Icons.Material.Filled.Tune"
+                           Size="Size.Small"
+                           Color="@(_showFilter ? Color.Primary : Color.Default)"
+                           OnClick="ToggleFilter"
+                           aria-label="@L["Study.ModeFilter.Title"]" />
         </MudStack>
+
+        @if (_showFilter)
+        {
+            <MudPaper Outlined="true" Class="pa-3 mb-3">
+                <MudText Typo="Typo.subtitle2" Class="mb-2">@L["Study.ModeFilter.Title"]</MudText>
+                <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="2">
+                    @foreach (var mode in _allModes)
+                    {
+                        var selected = _allowedModes.Contains(mode);
+                        <MudChip T="StudyMode"
+                                 Value="@mode"
+                                 Variant="@(selected ? Variant.Filled : Variant.Outlined)"
+                                 Color="@(selected ? Color.Primary : Color.Default)"
+                                 OnClick="@(() => ToggleMode(mode))">
+                            @L[$"Study.Mode.{mode}"]
+                        </MudChip>
+                    }
+                </MudStack>
+                @if (_allowedModes.Count == 0)
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Warning" Class="mt-2 d-block">
+                        @L["Study.ModeFilter.NoneSelected"]
+                    </MudText>
+                }
+            </MudPaper>
+        }
 
         @if (!_loading && _total > 0)
         {
@@ -40,6 +71,13 @@
             <div class="d-flex justify-center pa-12">
                 <MudProgressCircular Indeterminate="true" />
             </div>
+        }
+        else if (_allowedModes.Count == 0)
+        {
+            <MudPaper Class="pa-8 text-center" Elevation="0" Outlined="true">
+                <MudIcon Icon="@Icons.Material.Filled.FilterAltOff" Color="Color.Warning" Size="Size.Large" />
+                <MudText Typo="Typo.h6" Class="mt-4">@L["Study.ModeFilter.NoneSelected"]</MudText>
+            </MudPaper>
         }
         else if (_currentCard is null)
         {
@@ -61,29 +99,84 @@
 @code {
     [Parameter] public Guid PartnershipId { get; set; }
 
+    private static readonly StudyMode[] _allModes =
+    {
+        StudyMode.Flashcard,
+        StudyMode.Type,
+        StudyMode.MultipleChoice,
+        StudyMode.Listening,
+        StudyMode.Cloze,
+    };
+
     private bool _loading = true;
+    private bool _showFilter;
+    private bool _prefsLoaded;
     private string? _userId;
     private Queue<StudyCard> _queue = new();
     private StudyCard? _currentCard;
     private int _total;
     private int _done;
+    private HashSet<StudyMode> _allowedModes = new(_allModes);
 
     protected override async Task OnInitializedAsync()
     {
         var auth = await AuthStateProvider.GetAuthenticationStateAsync();
         _userId = UserManager.GetUserId(auth.User);
-        if (_userId is null) return;
+    }
 
-        var cards = await StudyService.GetDueCardsAsync(PartnershipId, _userId);
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _prefsLoaded || _userId is null) return;
+        _prefsLoaded = true;
+
+        try
+        {
+            var saved = await JS.InvokeAsync<string[]?>("studyBuddiesPrefs.getStudyModes");
+            if (saved is { Length: > 0 })
+            {
+                var parsed = new HashSet<StudyMode>();
+                foreach (var name in saved)
+                {
+                    if (Enum.TryParse<StudyMode>(name, out var m)) parsed.Add(m);
+                }
+                if (parsed.Count > 0) _allowedModes = parsed;
+            }
+        }
+        catch
+        {
+        }
+
+        await ReloadCardsAsync();
+    }
+
+    private async Task ReloadCardsAsync()
+    {
+        if (_userId is null) return;
+        _loading = true;
+        StateHasChanged();
+
+        if (_allowedModes.Count == 0)
+        {
+            _queue.Clear();
+            _currentCard = null;
+            _total = 0;
+            _done = 0;
+            _loading = false;
+            StateHasChanged();
+            return;
+        }
+
+        var cards = await StudyService.GetDueCardsAsync(PartnershipId, _userId, allowedModes: _allowedModes);
         if (cards.Count == 0)
         {
-            cards = await StudyService.GetExtraPracticeCardsAsync(PartnershipId, _userId);
+            cards = await StudyService.GetExtraPracticeCardsAsync(PartnershipId, _userId, allowedModes: _allowedModes);
         }
         _queue = new Queue<StudyCard>(cards);
         _total = _queue.Count;
         _done = 0;
         LoadNext();
         _loading = false;
+        StateHasChanged();
     }
 
     private void LoadNext()
@@ -104,6 +197,28 @@
         {
             Snackbar.Add(ex.Message, Severity.Error);
         }
+    }
+
+    private void ToggleFilter() => _showFilter = !_showFilter;
+
+    private async Task ToggleMode(StudyMode mode)
+    {
+        if (!_allowedModes.Add(mode))
+        {
+            _allowedModes.Remove(mode);
+        }
+
+        try
+        {
+            await JS.InvokeVoidAsync(
+                "studyBuddiesPrefs.setStudyModes",
+                (object)_allowedModes.Select(m => m.ToString()).ToArray());
+        }
+        catch
+        {
+        }
+
+        await ReloadCardsAsync();
     }
 
     private async Task GoBack()

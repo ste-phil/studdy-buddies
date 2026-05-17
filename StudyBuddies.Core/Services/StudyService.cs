@@ -7,7 +7,7 @@ public class StudyService(ApplicationDbContext db) : IStudyService
 {
     public const int DailyGoal = 10;
 
-    public async Task<List<StudyCard>> GetDueCardsAsync(Guid partnershipId, string learnerUserId, int max = 20, int newPerDay = 10, CancellationToken ct = default)
+    public async Task<List<StudyCard>> GetDueCardsAsync(Guid partnershipId, string learnerUserId, int max = 20, int newPerDay = 10, IReadOnlySet<StudyMode>? allowedModes = null, CancellationToken ct = default)
     {
         await EnsureMemberAsync(partnershipId, learnerUserId, ct);
 
@@ -43,10 +43,10 @@ public class StudyService(ApplicationDbContext db) : IStudyService
 
         var allCards = dueWords.Concat(newWords).ToList();
 
-        return await BuildCardsAsync(allCards, partnershipId, learnerUserId, ct);
+        return await BuildCardsAsync(allCards, partnershipId, learnerUserId, allowedModes, ct);
     }
 
-    public async Task<List<StudyCard>> GetExtraPracticeCardsAsync(Guid partnershipId, string learnerUserId, int max = 20, CancellationToken ct = default)
+    public async Task<List<StudyCard>> GetExtraPracticeCardsAsync(Guid partnershipId, string learnerUserId, int max = 20, IReadOnlySet<StudyMode>? allowedModes = null, CancellationToken ct = default)
     {
         await EnsureMemberAsync(partnershipId, learnerUserId, ct);
 
@@ -73,10 +73,10 @@ public class StudyService(ApplicationDbContext db) : IStudyService
             : new List<Word>();
 
         var allWords = newWords.Concat(reviewedWords).ToList();
-        return await BuildCardsAsync(allWords, partnershipId, learnerUserId, ct);
+        return await BuildCardsAsync(allWords, partnershipId, learnerUserId, allowedModes, ct);
     }
 
-    private async Task<List<StudyCard>> BuildCardsAsync(List<Word> words, Guid partnershipId, string learnerUserId, CancellationToken ct)
+    private async Task<List<StudyCard>> BuildCardsAsync(List<Word> words, Guid partnershipId, string learnerUserId, IReadOnlySet<StudyMode>? allowedModes, CancellationToken ct)
     {
         if (words.Count == 0)
         {
@@ -95,7 +95,7 @@ public class StudyService(ApplicationDbContext db) : IStudyService
         return words.Select(w =>
         {
             var forwardDistractorCount = translationPool.Count(t => t != w.Translation);
-            var mode = StudyModeSelector.Pick(w, w.Review, forwardDistractorCount);
+            var mode = StudyModeSelector.Pick(w, w.Review, forwardDistractorCount, allowedModes);
 
             // Cloze stays forward (Example is in TermLanguage). Other modes flip 50/50.
             var reversed = mode != StudyMode.Cloze && rng.Next(2) == 0;

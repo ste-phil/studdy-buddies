@@ -58,6 +58,26 @@ window.studyBuddiesHotkeys = {
     }
 };
 
+window.studyBuddiesPrefs = {
+    getStudyModes: function () {
+        try {
+            const raw = localStorage.getItem('sb.studyModes');
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : null;
+        } catch (e) {
+            return null;
+        }
+    },
+    setStudyModes: function (modes) {
+        try {
+            localStorage.setItem('sb.studyModes', JSON.stringify(modes || []));
+        } catch (e) {
+            console.error('Failed to persist study modes', e);
+        }
+    }
+};
+
 window.studyBuddiesSpeech = {
     speak: function (text, lang) {
         if (!('speechSynthesis' in window)) {

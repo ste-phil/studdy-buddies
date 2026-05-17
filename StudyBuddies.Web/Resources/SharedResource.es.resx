@@ -197,6 +197,8 @@
   <data name="Study.Mode.MultipleChoice" xml:space="preserve"><value>Quiz</value></data>
   <data name="Study.Mode.Listening" xml:space="preserve"><value>Escuchar</value></data>
   <data name="Study.Mode.Cloze" xml:space="preserve"><value>Hueco</value></data>
+  <data name="Study.ModeFilter.Title" xml:space="preserve"><value>Tipos de ejercicio</value></data>
+  <data name="Study.ModeFilter.NoneSelected" xml:space="preserve"><value>Ningún tipo seleccionado. Activa al menos uno.</value></data>
   <data name="Study.Type.Placeholder" xml:space="preserve"><value>Tu respuesta …</value></data>
   <data name="Study.Type.Check" xml:space="preserve"><value>Comprobar</value></data>
   <data name="Study.Type.Correct" xml:space="preserve"><value>¡Correcto!</value></data>
